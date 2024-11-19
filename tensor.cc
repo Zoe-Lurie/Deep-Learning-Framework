@@ -39,6 +39,10 @@ Tensor Tensor::zeroes(vDims dims){
     return MAKET(Zeroes, dims, (dims));
 }
 
+Tensor Tensor::ones(vDims dims){
+    return MAKET(Ones, dims, (dims));
+}
+
 Tensor Tensor::neg(){
     ADDARG(*this);
     return MAKET(Neg, getDims(), (this->contents));

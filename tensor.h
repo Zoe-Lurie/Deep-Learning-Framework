@@ -32,7 +32,8 @@ class TensorFunction{
         enum operation
             {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
                 ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
-                ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL}
+                ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
+                ONES}
             op;
     public:
         virtual ~TensorFunction() =default;
@@ -75,7 +76,7 @@ class Tensor{
         vDims getDims();
 
         static Tensor zeroes(vDims);
-        //static Tensor ones(vDims dims);
+        static Tensor ones(vDims);
 
         //Tensor reshape(vDims new_dims);
         //Tensor transpose();
