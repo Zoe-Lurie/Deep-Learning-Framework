@@ -9,16 +9,17 @@
 
 class Tensor;
 class TensorData;
+class TensorFunction;
+class TensorContents;
 
 typedef std::vector<size_t> vDims;
-typedef Tensor tEvalArg;
-typedef std::vector<std::any> evalArgs;
-typedef std::function<TensorData(evalArgs)> evalFunc;
+typedef std::shared_ptr<TensorFunction> TensorFunctionPtr;
+typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 class TensorData{
+    size_t dataLen;
     public:
         std::vector<double> data;
-        size_t dataLen;
 
         TensorData(vDims dims);
         TensorData(vDims dims, std::vector<double> data);
@@ -26,30 +27,27 @@ class TensorData{
 };
 
 class TensorFunction{
-    evalArgs argv;
-    evalFunc method;
-
+    protected:
+        enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX} op;
     public:
-        TensorFunction(evalArgs argv, evalFunc func) : argv(argv), method(func) {}
-        TensorData callMethod() {return method(argv);}
-        evalFunc getMethod() {return method;}
-        evalArgs getArgv() {return argv;}
+        virtual ~TensorFunction() =default;
+        operation getOp() {return op;}
+        virtual TensorData eval() =0;
 };
 
 class TensorContents{
-    std::variant<TensorData, TensorFunction> contents;
+    std::variant<TensorData, TensorFunctionPtr> contents;
     vDims dims;
     size_t forwardArgCount = 0;
 
     public:
-        TensorContents(vDims, evalArgs, evalFunc);
+        TensorContents(vDims, TensorFunctionPtr);
         TensorContents(vDims, std::vector<double>);
 
         TensorData getData() {return std::get<TensorData>(contents);}
-        TensorFunction getFunc() {return std::get<TensorFunction>(contents);}
-        bool isFunc() {return std::holds_alternative<TensorFunction>(contents);}
-
-        void changeToData(TensorData& data) {contents = data;}
+        TensorFunctionPtr getFunc() {return std::get<TensorFunctionPtr>(contents);}
+        bool isFunc() {return std::holds_alternative<TensorFunctionPtr>(contents);}
+        void eval();
 
         vDims getDims() {return dims;}
         void addArg() {forwardArgCount++;}
@@ -59,7 +57,7 @@ class TensorContents{
 
 class Tensor{
     private:
-        std::shared_ptr<TensorContents> contents;
+        TensorContentsPtr contents;
 
     public:
         Tensor(vDims dims, std::vector<double> data);
@@ -114,15 +112,7 @@ class Tensor{
         vDims getDims() {return contents->getDims();}
     
     private:
-        Tensor(vDims, evalArgs, evalFunc);
-        void eval();
-
-        static TensorData evalZeroes(evalArgs);
-
-        static TensorData evalNeg(evalArgs);
-        static TensorData evalAdd(evalArgs);
-        static TensorData evalAddScalar(evalArgs);
-        static TensorData evalSoftmax(evalArgs);
+        Tensor(vDims, TensorFunctionPtr);
 };
 #endif
 
