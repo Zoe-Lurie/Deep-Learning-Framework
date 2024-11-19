@@ -74,7 +74,6 @@ class TensorFunctionAddScalar : public TensorFunction{
 
 class TensorFunctionSoftmax : public TensorFunction{
     TensorContentsPtr arg1;
-
     public:
         TensorFunctionSoftmax(TensorContentsPtr arg1) : arg1(arg1) { op = SOFTMAX; }
 
@@ -88,11 +87,9 @@ class TensorFunctionSoftmax : public TensorFunction{
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 sum += data1[i];
             }
-
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 retData.data[i] = data1[i] / sum;
             }
-
             return retData;
         }
 };
