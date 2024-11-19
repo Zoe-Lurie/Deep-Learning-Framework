@@ -13,8 +13,9 @@ int main(){
     auto t3 = t1.neg();
     auto t4 = t3 + t2;
     auto t5 = t4 + 10;
-    auto t6 = t5.softmax();
-    t6 = t6 + t6;
+    auto t6 = t5.elementwiseMult(t1);
+    t6 = t5 - 0.5;
+    t6 = 2 * t6;
 
     t6.print();
 

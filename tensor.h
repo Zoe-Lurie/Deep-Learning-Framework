@@ -29,7 +29,9 @@ class TensorData{
 
 class TensorFunction{
     protected:
-        enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX} op;
+        enum operation
+            {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT, ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION, ELEMENTWISEDIVISIONSCALAR}
+            op;
     public:
         virtual ~TensorFunction() =default;
         operation getOp() {return op;}
@@ -84,23 +86,23 @@ class Tensor{
         Tensor operator + (double x) {return add(x);}
         friend Tensor operator + (double n, Tensor x) {return x.add(n);}
 
-        //Tensor subtract( Tensor);
-        //Tensor operator - (Tensor x) {return subtract(x);}
-        //Tensor subtract(double);
-        //Tensor operator - (double x) {return subtract(x);}
-        //friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
+        Tensor subtract( Tensor);
+        Tensor operator - (Tensor x) {return subtract(x);}
+        Tensor subtract(double);
+        Tensor operator - (double x) {return subtract(x);}
+        friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
 
-        //Tensor elementwiseMult(Tensor);
-        //Tensor operator * (Tensor x) {return elementwiseMult(x);}
-        //Tensor elementwiseMult(double);
-        //Tensor operator * (double x) {return elementwiseMult(x);}
-        //friend Tensor operator * (double n, Tensor x) {return x.elementwiseMult(n);}
+        Tensor elementwiseMult(Tensor);
+        Tensor operator * (Tensor x) {return elementwiseMult(x);}
+        Tensor elementwiseMult(double);
+        Tensor operator * (double x) {return elementwiseMult(x);}
+        friend Tensor operator * (double n, Tensor x) {return x.elementwiseMult(n);}
 
-        //Tensor elementwiseDivision(Tensor);
-        //Tensor operator / (Tensor x) {return elementwiseDivision(x);}
-        //Tensor elementwiseDivision(double);
-        //Tensor operator / (double x) {return elementwiseDivision(x);}
-        //friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
+        Tensor elementwiseDivision(Tensor);
+        Tensor operator / (Tensor x) {return elementwiseDivision(x);}
+        Tensor elementwiseDivision(double);
+        Tensor operator / (double x) {return elementwiseDivision(x);}
+        friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
 
         //Tensor pow(double);
         //Tensor relu();

@@ -19,6 +19,22 @@ Tensor::Tensor(vDims dims, TensorFunctionPtr ptr){
 }
 
 
+vDims Tensor::getDims(){
+    return contents->getDims();
+}
+
+std::vector<double> Tensor::getData(){
+    this->contents->eval();
+    return (contents->getData().getData());
+}
+
+void Tensor::print(){
+    auto data = getData();
+    for(auto d : data)
+        printf("%f\n", d);
+}
+
+
 Tensor Tensor::zeroes(vDims dims){
     return MAKET(Zeroes, dims, (dims));
 }
@@ -40,24 +56,44 @@ Tensor Tensor::add(double x){
     return MAKET(AddScalar, getDims(), (this->contents, x));
 }
 
+Tensor Tensor::subtract(Tensor x){
+    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::subtract");
+    ADDARG(*this);
+    ADDARG(x);
+    return MAKET(Subtract, getDims(), (this->contents, x.contents));
+}
+
+Tensor Tensor::subtract(double x){
+    ADDARG(*this);
+    return MAKET(AddScalar, getDims(), (this->contents, -x));
+}
+
 Tensor Tensor::softmax(){
     if(getDims().size() != 1) throw std::runtime_error("Dimensions must be 1d in Tensor::softmax");
     ADDARG(*this);
     return MAKET(Softmax, getDims(), (this->contents));
 }
 
-vDims Tensor::getDims(){
-    return contents->getDims();
+Tensor Tensor::elementwiseMult(Tensor x){
+    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
+    ADDARG(*this);
+    ADDARG(x);
+    return MAKET(ElementwiseMult, getDims(), (this->contents, x.contents));
 }
 
-std::vector<double> Tensor::getData(){
-    this->contents->eval();
-    return (contents->getData().getData());
+Tensor Tensor::elementwiseMult(double x){
+    ADDARG(*this);
+    return MAKET(ElementwiseMultScalar, getDims(), (this->contents, x));
 }
 
-void Tensor::print(){
-    auto data = getData();
-    for(auto d : data)
-        printf("%f\n", d);
+Tensor Tensor::elementwiseDivision(Tensor x){
+    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseDivision");
+    ADDARG(*this);
+    ADDARG(x);
+    return MAKET(ElementwiseDivision, getDims(), (this->contents, x.contents));
 }
 
+Tensor Tensor::elementwiseDivision(double x){
+    ADDARG(*this);
+    return MAKET(ElementwiseDivisionScalar, getDims(), (this->contents, x));
+}
