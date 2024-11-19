@@ -7,12 +7,13 @@ class TensorFunctionNeg : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            auto data1 = arg1->getData().data;
+            vData data1 = arg1->getData().getData();
 
             TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
-                retData.data[i] = -data1[i];
+                data[i] = -data1[i];
             }
             return retData;
         }
@@ -25,9 +26,10 @@ class TensorFunctionZeroes : public TensorFunction{
 
         TensorData eval(){
             TensorData retData(dims);
+            vData& data = retData.getData();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
-                retData.data[i] = 0;
+                data[i] = 0;
             }
             return retData;
         }
@@ -41,13 +43,14 @@ class TensorFunctionAdd : public TensorFunction{
         TensorData eval(){
             arg1->eval();
             arg2->eval();
-            auto data1 = arg1->getData().data;
-            auto data2 = arg2->getData().data;
+            vData data1 = arg1->getData().getData();
+            vData data2 = arg2->getData().getData();
 
             TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
-                retData.data[i] = data1[i] + data2[i];
+                data[i] = data1[i] + data2[i];
             }
             return retData;
         }
@@ -61,12 +64,13 @@ class TensorFunctionAddScalar : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            auto data1 = arg1->getData().data;
+            vData data1 = arg1->getData().getData();
 
             TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
-                retData.data[i] = data1[i] + n;
+                data[i] = data1[i] + n;
             }
             return retData;
         }
@@ -79,16 +83,17 @@ class TensorFunctionSoftmax : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            auto data1 = arg1->getData().data;
+            vData data1 = arg1->getData().getData();
 
             TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
 
             double sum = 0;
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 sum += data1[i];
             }
             for(size_t i = 0; i < retData.getDataLen(); ++i){
-                retData.data[i] = data1[i] / sum;
+                data[i] = data1[i] / sum;
             }
             return retData;
         }

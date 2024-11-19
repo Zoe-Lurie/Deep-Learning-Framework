@@ -14,7 +14,7 @@ int main(){
     auto t4 = t3 + t2;
     auto t5 = t4 + 10;
     auto t6 = t5.softmax();
-    t6 = t6 + t6 + t1;
+    t6 = t6 + t6;
 
     t6.print();
 

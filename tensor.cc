@@ -46,9 +46,13 @@ Tensor Tensor::softmax(){
     return MAKET(Softmax, getDims(), (this->contents));
 }
 
+vDims Tensor::getDims(){
+    return contents->getDims();
+}
+
 std::vector<double> Tensor::getData(){
     this->contents->eval();
-    return contents->getData().data;
+    return (contents->getData().getData());
 }
 
 void Tensor::print(){

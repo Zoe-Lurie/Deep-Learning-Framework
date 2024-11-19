@@ -13,17 +13,18 @@ class TensorFunction;
 class TensorContents;
 
 typedef std::vector<size_t> vDims;
+typedef std::vector<double> vData;
 typedef std::shared_ptr<TensorFunction> TensorFunctionPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 class TensorData{
     size_t dataLen;
+    vData data;
     public:
-        std::vector<double> data;
-
-        TensorData(vDims dims);
-        TensorData(vDims dims, std::vector<double> data);
+        TensorData(vDims);
+        TensorData(vDims, vData);
         size_t getDataLen() {return dataLen;}
+        vData& getData() {return data;}
 };
 
 class TensorFunction{
@@ -44,9 +45,9 @@ class TensorContents{
         TensorContents(vDims, TensorFunctionPtr);
         TensorContents(vDims, std::vector<double>);
 
-        TensorData getData() {return std::get<TensorData>(contents);}
-        TensorFunctionPtr getFunc() {return std::get<TensorFunctionPtr>(contents);}
-        bool isFunc() {return std::holds_alternative<TensorFunctionPtr>(contents);}
+        TensorData getData();
+        TensorFunctionPtr getFunc();
+        bool isFunc();
         void eval();
 
         vDims getDims() {return dims;}
@@ -59,11 +60,17 @@ class Tensor{
     private:
         TensorContentsPtr contents;
 
+        Tensor(vDims, TensorFunctionPtr);
+
     public:
-        Tensor(vDims dims, std::vector<double> data);
+        Tensor(vDims, std::vector<double> data);
         //Tensor(vDims dims, std::vector<std::vector<size_t>> idx, std::vector<double> val);
 
-        static Tensor zeroes(vDims dims);
+        void print();
+        std::vector<double> getData();
+        vDims getDims();
+
+        static Tensor zeroes(vDims);
         //static Tensor ones(vDims dims);
 
         //Tensor reshape(vDims new_dims);
@@ -106,13 +113,6 @@ class Tensor{
         //Tensor reduceMean(size_t dim = 0);
         Tensor softmax();
         //Tensor argmax();
-
-        void print();
-        std::vector<double> getData();
-        vDims getDims() {return contents->getDims();}
-    
-    private:
-        Tensor(vDims, TensorFunctionPtr);
 };
 #endif
 

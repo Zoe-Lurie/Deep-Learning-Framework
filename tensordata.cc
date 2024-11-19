@@ -9,7 +9,7 @@ TensorData::TensorData(vDims dims){
     data.resize(dataLen);
 }
 
-TensorData::TensorData(vDims dims, std::vector<double> data) : data(data){
+TensorData::TensorData(vDims dims, vData data) : data(data){
     dataLen = 1;
     for(auto d : dims){
         dataLen *= d;
