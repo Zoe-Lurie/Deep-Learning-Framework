@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "tensor.h"
 
 class TensorFunctionNeg : public TensorFunction{
@@ -197,6 +199,102 @@ class TensorFunctionElementwiseDivisionScalar : public TensorFunction{
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] / n;
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionRelu : public TensorFunction{
+    TensorContentsPtr arg1;
+    public:
+        TensorFunctionRelu(TensorContentsPtr arg1) : arg1(arg1) { op = RELU; }
+
+        TensorData eval(){
+            arg1->eval();
+            vData data1 = arg1->getData().getData();
+
+            TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = data1[i] > 0 ? data1[i] : 0;
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionBinarize : public TensorFunction{
+    TensorContentsPtr arg1;
+    public:
+        TensorFunctionBinarize(TensorContentsPtr arg1) : arg1(arg1) { op = BINARIZE; }
+
+        TensorData eval(){
+            arg1->eval();
+            vData data1 = arg1->getData().getData();
+
+            TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = data1[i] > 0 ? 1 : 0;
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionPow : public TensorFunction{
+    TensorContentsPtr arg1;
+    double n;
+    public:
+        TensorFunctionPow(TensorContentsPtr arg1, double n) : arg1(arg1), n(n) { op = POW; }
+
+        TensorData eval(){
+            arg1->eval();
+            vData data1 = arg1->getData().getData();
+
+            TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = std::pow(data1[i], n);
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionExp : public TensorFunction{
+    TensorContentsPtr arg1;
+    public:
+        TensorFunctionExp(TensorContentsPtr arg1) : arg1(arg1) { op = EXP; }
+
+        TensorData eval(){
+            arg1->eval();
+            vData data1 = arg1->getData().getData();
+
+            TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = std::exp(data1[i]);
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionReciprocal : public TensorFunction{
+    TensorContentsPtr arg1;
+    public:
+        TensorFunctionReciprocal(TensorContentsPtr arg1) : arg1(arg1) { op = RECIPROCAL; }
+
+        TensorData eval(){
+            arg1->eval();
+            vData data1 = arg1->getData().getData();
+
+            TensorData retData(arg1->getDims());
+            vData& data = retData.getData();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = 1 / data1[i];
             }
             return retData;
         }

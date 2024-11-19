@@ -30,7 +30,9 @@ class TensorData{
 class TensorFunction{
     protected:
         enum operation
-            {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT, ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION, ELEMENTWISEDIVISIONSCALAR}
+            {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
+                ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
+                ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL}
             op;
     public:
         virtual ~TensorFunction() =default;
@@ -77,8 +79,6 @@ class Tensor{
 
         //Tensor reshape(vDims new_dims);
         //Tensor transpose();
-        Tensor neg();
-        //Tensor reciprocal();
 
         Tensor add(Tensor);
         Tensor operator + (Tensor x) {return add(x);}
@@ -104,11 +104,14 @@ class Tensor{
         Tensor operator / (double x) {return elementwiseDivision(x);}
         friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
 
-        //Tensor pow(double);
-        //Tensor relu();
-        //Tensor binarize();
-        //Tensor exp();
-        //Tensor matmul(Tensor&);
+        Tensor neg();
+        Tensor reciprocal();
+        Tensor pow(double);
+        Tensor relu();
+        Tensor binarize();
+        Tensor exp();
+
+        //Tensor matmul(Tensor);
 
         //Tensor reduceSum(size_t dim = 0);
         //Tensor reduceProd(size_t dim = 0);

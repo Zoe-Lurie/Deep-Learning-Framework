@@ -97,3 +97,25 @@ Tensor Tensor::elementwiseDivision(double x){
     ADDARG(*this);
     return MAKET(ElementwiseDivisionScalar, getDims(), (this->contents, x));
 }
+
+Tensor Tensor::relu(){
+    return MAKET(Relu, getDims(), (this->contents));
+}
+
+Tensor Tensor::binarize(){
+    return MAKET(Binarize, getDims(), (this->contents));
+}
+
+Tensor Tensor::pow(double x){
+    ADDARG(*this);
+    return MAKET(Pow, getDims(), (this->contents, x));
+}
+
+Tensor Tensor::exp(){
+    return MAKET(Exp, getDims(), (this->contents));
+}
+
+Tensor Tensor::reciprocal(){
+    return MAKET(Reciprocal, getDims(), (this->contents));
+}
+

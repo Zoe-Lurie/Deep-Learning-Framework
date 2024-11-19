@@ -15,7 +15,7 @@ int main(){
     auto t5 = t4 + 10;
     auto t6 = t5.elementwiseMult(t1);
     t6 = t5 - 0.5;
-    t6 = 2 * t6;
+    t6 = (2 * t6 - 12).reciprocal();
 
     t6.print();
 
