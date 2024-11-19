@@ -91,7 +91,7 @@ class Tensor{
         Tensor operator - (Tensor x) {return subtract(x);}
         Tensor subtract(double);
         Tensor operator - (double x) {return subtract(x);}
-        friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
+        //friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
 
         Tensor elementwiseMult(Tensor);
         Tensor operator * (Tensor x) {return elementwiseMult(x);}
@@ -103,7 +103,7 @@ class Tensor{
         Tensor operator / (Tensor x) {return elementwiseDivision(x);}
         Tensor elementwiseDivision(double);
         Tensor operator / (double x) {return elementwiseDivision(x);}
-        friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
+        //friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
 
         Tensor neg();
         Tensor reciprocal();
