@@ -5,8 +5,7 @@ TensorData::TensorData(vDims dims){
     for(auto d : dims){
         dataLen *= d;
     }
-
-    data.resize(dataLen);
+    data = std::make_shared<std::vector<double>>(std::vector<double>(dataLen));
 }
 
 TensorData::TensorData(vDims dims, vData data) : data(data){

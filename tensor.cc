@@ -9,7 +9,7 @@
 #define ADDARG(VAR) (VAR).contents->addArg()
 
 Tensor::Tensor(vDims dims, std::vector<double> data){
-    TensorContents cont = TensorContents(dims, data);
+    TensorContents cont = TensorContents(dims, std::make_shared<std::vector<double>>(data));
     contents = std::make_shared<TensorContents>(cont);
 }
 
@@ -25,7 +25,7 @@ vDims Tensor::getDims(){
 
 std::vector<double> Tensor::getData(){
     this->contents->eval();
-    return (contents->getData().getData());
+    return *(contents->getData().getData());
 }
 
 void Tensor::print(){
@@ -121,5 +121,27 @@ Tensor Tensor::exp(){
 
 Tensor Tensor::reciprocal(){
     return MAKET(Reciprocal, getDims(), (this->contents));
+}
+
+Tensor Tensor::matmul(Tensor x){
+    vDims dims = getDims();
+    vDims xdims = x.getDims();
+    if(xdims.size() != 2){
+      throw std::runtime_error("The right operand of matmul must be 2D tensors");
+    }
+    if(dims.size() != 2 && dims.size() != 3){
+      throw std::runtime_error("The left operand of matmul must be 2D tensors or batched 2D tensors");
+    }
+    if(dims[dims.size() - 1] != xdims[0]){
+      throw std::runtime_error("Mismatched matmul matrix dimensions");
+    }
+
+    vDims retdims;
+    if(dims.size() == 2) retdims = {dims[0], xdims[1]};
+    else retdims = {dims[0], dims[1], xdims[1]};
+
+    ADDARG(*this);
+    ADDARG(x);
+    return MAKET(Matmul, retdims, (this->contents, x.contents, retdims));
 }
 

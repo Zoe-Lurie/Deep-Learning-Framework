@@ -13,7 +13,7 @@ class TensorFunction;
 class TensorContents;
 
 typedef std::vector<size_t> vDims;
-typedef std::vector<double> vData;
+typedef std::shared_ptr<std::vector<double>> vData;
 typedef std::shared_ptr<TensorFunction> TensorFunctionPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
@@ -24,7 +24,7 @@ class TensorData{
         TensorData(vDims);
         TensorData(vDims, vData);
         size_t getDataLen() {return dataLen;}
-        vData& getData() {return data;}
+        vData getData() {return data;}
 };
 
 class TensorFunction{
@@ -33,7 +33,7 @@ class TensorFunction{
             {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
                 ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
                 ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-                ONES}
+                ONES, MATMUL}
             op;
     public:
         virtual ~TensorFunction() =default;
@@ -48,7 +48,7 @@ class TensorContents{
 
     public:
         TensorContents(vDims, TensorFunctionPtr);
-        TensorContents(vDims, std::vector<double>);
+        TensorContents(vDims, vData);
 
         TensorData getData();
         TensorFunctionPtr getFunc();
@@ -112,7 +112,7 @@ class Tensor{
         Tensor binarize();
         Tensor exp();
 
-        //Tensor matmul(Tensor);
+        Tensor matmul(Tensor);
 
         //Tensor reduceSum(size_t dim = 0);
         //Tensor reduceProd(size_t dim = 0);

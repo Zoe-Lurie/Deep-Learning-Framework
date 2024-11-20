@@ -9,10 +9,10 @@ class TensorFunctionNeg : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = -data1[i];
@@ -28,7 +28,7 @@ class TensorFunctionZeroes : public TensorFunction{
 
         TensorData eval(){
             TensorData retData(dims);
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = 0;
@@ -44,7 +44,7 @@ class TensorFunctionOnes : public TensorFunction{
 
         TensorData eval(){
             TensorData retData(dims);
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = 1;
@@ -61,11 +61,11 @@ class TensorFunctionAdd : public TensorFunction{
         TensorData eval(){
             arg1->eval();
             arg2->eval();
-            vData data1 = arg1->getData().getData();
-            vData data2 = arg2->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
+            auto data2 = arg2->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] + data2[i];
@@ -82,10 +82,10 @@ class TensorFunctionAddScalar : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] + n;
@@ -101,10 +101,10 @@ class TensorFunctionSoftmax : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             double sum = 0;
             for(size_t i = 0; i < retData.getDataLen(); ++i){
@@ -125,11 +125,11 @@ class TensorFunctionSubtract : public TensorFunction{
         TensorData eval(){
             arg1->eval();
             arg2->eval();
-            vData data1 = arg1->getData().getData();
-            vData data2 = arg2->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
+            auto data2 = arg2->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] - data2[i];
@@ -146,11 +146,11 @@ class TensorFunctionElementwiseMult : public TensorFunction{
         TensorData eval(){
             arg1->eval();
             arg2->eval();
-            vData data1 = arg1->getData().getData();
-            vData data2 = arg2->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
+            auto data2 = arg2->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] * data2[i];
@@ -167,10 +167,10 @@ class TensorFunctionElementwiseMultScalar : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] * n;
@@ -187,11 +187,11 @@ class TensorFunctionElementwiseDivision : public TensorFunction{
         TensorData eval(){
             arg1->eval();
             arg2->eval();
-            vData data1 = arg1->getData().getData();
-            vData data2 = arg2->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
+            auto data2 = arg2->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] / data2[i];
@@ -208,10 +208,10 @@ class TensorFunctionElementwiseDivisionScalar : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] / n;
@@ -227,10 +227,10 @@ class TensorFunctionRelu : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] > 0 ? data1[i] : 0;
@@ -246,10 +246,10 @@ class TensorFunctionBinarize : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = data1[i] > 0 ? 1 : 0;
@@ -266,10 +266,10 @@ class TensorFunctionPow : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = std::pow(data1[i], n);
@@ -285,10 +285,10 @@ class TensorFunctionExp : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = std::exp(data1[i]);
@@ -304,13 +304,54 @@ class TensorFunctionReciprocal : public TensorFunction{
 
         TensorData eval(){
             arg1->eval();
-            vData data1 = arg1->getData().getData();
+            auto data1 = arg1->getData().getData()->data();
 
             TensorData retData(arg1->getDims());
-            vData& data = retData.getData();
+            auto data = retData.getData()->data();
 
             for(size_t i = 0; i < retData.getDataLen(); ++i){
                 data[i] = 1 / data1[i];
+            }
+            return retData;
+        }
+};
+
+class TensorFunctionMatmul : public TensorFunction{
+    TensorContentsPtr arg1, arg2;
+    vDims dims;
+    public:
+        TensorFunctionMatmul(TensorContentsPtr arg1, TensorContentsPtr arg2, vDims dims) : arg1(arg1), arg2(arg2), dims(dims) { op = MATMUL; }
+
+        TensorData eval(){
+            arg1->eval();
+            arg2->eval();
+            auto data1 = arg1->getData().getData()->data();
+            auto data2 = arg2->getData().getData()->data();
+
+            TensorData retData(dims);
+            auto data = retData.getData()->data();
+
+            if(dims.size() == 2){
+                for(size_t i = 0; i < dims[0]; ++i){
+                    for(size_t j = 0; j < dims[1]; ++j){
+                        data[i * dims[0] + j] = 0;
+                        for(size_t k = 0; k < arg1->getDims()[1]; ++k){
+                            data[i * dims[1] + j] += data1[i * arg1->getDims()[1] + k] * data2[k * arg2->getDims()[1] + j];
+                        }
+                    }
+                }
+            }
+            else{
+                for(size_t b = 0; b < dims[0]; ++b){
+                    for(size_t i = 0; i < dims[1]; ++i){
+                        for(size_t j = 0; j < dims[2]; ++j){
+                            data[b * dims[2] * dims[1] + i * dims[1] + j] = 0;
+                            for(size_t k = 0; k < arg1->getDims()[2]; ++k){
+                                data[b * dims[2] * dims[1] + i * dims[2] + j] += data1[b * arg1->getDims()[2] * arg1->getDims()[1] + i * arg1->getDims()[2] + k] * data2[k * arg2->getDims()[1] + j];
+                            }
+                        }
+                    }
+                }
             }
             return retData;
         }
