@@ -8,14 +8,19 @@
 #define MAKET(NAME, DIMS, ARGS) Tensor(DIMS, std::make_shared<TensorFunction##NAME>(TensorFunction##NAME ARGS))
 #define ADDARG(VAR) (VAR).contents->addArg()
 
-Tensor::Tensor(vDims dims, std::vector<double> data){
-    TensorContents cont = TensorContents(dims, std::make_shared<std::vector<double>>(data));
+Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient){
+    TensorContents cont = TensorContents(dims, std::make_shared<std::vector<double>>(data), saveGradient);
     contents = std::make_shared<TensorContents>(cont);
 }
 
-Tensor::Tensor(vDims dims, TensorFunctionPtr ptr){
-    TensorContents cont = TensorContents(dims, ptr);
+Tensor::Tensor(vDims dims, TensorFunctionPtr ptr, bool saveGradient){
+    TensorContents cont = TensorContents(dims, ptr, saveGradient);
     contents = std::make_shared<TensorContents>(cont);
+}
+
+void Tensor::eval(){
+    //this->contents->optimize();
+    this->contents->eval();
 }
 
 

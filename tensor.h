@@ -17,6 +17,11 @@ typedef std::shared_ptr<std::vector<double>> vData;
 typedef std::shared_ptr<TensorFunction> TensorFunctionPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
+enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
+    ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
+    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
+    ONES, MATMUL, FILL};
+
 class TensorData{
     size_t dataLen;
     vData data;
@@ -29,12 +34,7 @@ class TensorData{
 
 class TensorFunction{
     protected:
-        enum operation
-            {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
-                ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
-                ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-                ONES, MATMUL}
-            op;
+        operation op;
     public:
         virtual ~TensorFunction() =default;
         operation getOp() {return op;}
@@ -45,15 +45,17 @@ class TensorContents{
     std::variant<TensorData, TensorFunctionPtr> contents;
     vDims dims;
     size_t forwardArgCount = 0;
+    bool saveGradient;
 
     public:
-        TensorContents(vDims, TensorFunctionPtr);
-        TensorContents(vDims, vData);
+        TensorContents(vDims, TensorFunctionPtr, bool saveGradient);
+        TensorContents(vDims, vData, bool saveGradient);
 
         TensorData getData();
         TensorFunctionPtr getFunc();
         bool isFunc();
         void eval();
+        bool optimize();
 
         vDims getDims() {return dims;}
         void addArg() {forwardArgCount++;}
@@ -65,10 +67,12 @@ class Tensor{
     private:
         TensorContentsPtr contents;
 
-        Tensor(vDims, TensorFunctionPtr);
+        Tensor(vDims, TensorFunctionPtr, bool saveGradient = false);
+
+        void eval();
 
     public:
-        Tensor(vDims, std::vector<double> data);
+        Tensor(vDims, std::vector<double> data, bool saveGradient = false);
         //Tensor(vDims dims, std::vector<std::vector<size_t>> idx, std::vector<double> val);
 
         void print();

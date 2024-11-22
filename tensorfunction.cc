@@ -37,6 +37,23 @@ class TensorFunctionZeroes : public TensorFunction{
         }
 };
 
+class TensorFunctionFill : public TensorFunction{
+    vDims dims;
+    double n;
+    public:
+        TensorFunctionFill(vDims dims, double n) : dims(dims), n(n) { op = FILL; }
+
+        TensorData eval(){
+            TensorData retData(dims);
+            auto data = retData.getData()->data();
+
+            for(size_t i = 0; i < retData.getDataLen(); ++i){
+                data[i] = n;
+            }
+            return retData;
+        }
+};
+
 class TensorFunctionOnes : public TensorFunction{
     vDims dims;
     public:

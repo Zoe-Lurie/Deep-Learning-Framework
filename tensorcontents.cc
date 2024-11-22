@@ -2,11 +2,11 @@
 
 #include "tensor.h"
 
-TensorContents::TensorContents(vDims dims, TensorFunctionPtr ptr)
-    : contents(std::in_place_type<TensorFunctionPtr>, ptr), dims(dims) {}
+TensorContents::TensorContents(vDims dims, TensorFunctionPtr ptr, bool saveGradient)
+    : contents(std::in_place_type<TensorFunctionPtr>, ptr), dims(dims), saveGradient(saveGradient) {}
 
-TensorContents::TensorContents(vDims dims, vData data)
-    : contents(std::in_place_type<TensorData>, dims, data), dims(dims) {}
+TensorContents::TensorContents(vDims dims, vData data, bool saveGradient)
+    : contents(std::in_place_type<TensorData>, dims, data), dims(dims), saveGradient(saveGradient) {}
 
 TensorData TensorContents::getData(){
     return std::get<TensorData>(contents);
