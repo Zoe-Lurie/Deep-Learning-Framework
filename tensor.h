@@ -2,74 +2,28 @@
 #define TENSORH
 
 #include <vector>
-#include <functional>
-#include <variant>
-#include <any>
 #include <memory>
 
 class Tensor;
-class TensorData;
-class TensorFunction;
-class TensorContents;
+struct TensorContents;
 
 typedef std::vector<size_t> vDims;
-typedef std::shared_ptr<std::vector<double>> vData;
-typedef std::shared_ptr<TensorFunction> TensorFunctionPtr;
+typedef std::shared_ptr<std::vector<double>> vDataPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
     ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
     ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-    ONES, MATMUL, FILL};
+    ONES, MATMUL, FILL, DATA};
 
-class TensorData{
-    size_t dataLen;
-    vData data;
-    public:
-        TensorData(vDims);
-        TensorData(vDims, vData);
-        size_t getDataLen() {return dataLen;}
-        vData getData() {return data;}
-};
-
-class TensorFunction{
-    protected:
-        operation op;
-    public:
-        virtual ~TensorFunction() =default;
-        operation getOp() {return op;}
-        virtual TensorData eval() =0;
-};
-
-class TensorContents{
-    std::variant<TensorData, TensorFunctionPtr> contents;
-    vDims dims;
-    size_t forwardArgCount = 0;
-    bool saveGradient;
-
-    public:
-        TensorContents(vDims, TensorFunctionPtr, bool saveGradient);
-        TensorContents(vDims, vData, bool saveGradient);
-
-        TensorData getData();
-        TensorFunctionPtr getFunc();
-        bool isFunc();
-        void eval();
-        bool optimize();
-
-        vDims getDims() {return dims;}
-        void addArg() {forwardArgCount++;}
-        void delArg() {forwardArgCount--;}
-        size_t getArgCount() {return forwardArgCount;}
-};
 
 class Tensor{
+    friend class TensorContents;
     private:
         TensorContentsPtr contents;
 
-        Tensor(vDims, TensorFunctionPtr, bool saveGradient = false);
-
-        void eval();
+        Tensor(TensorContentsPtr);
+        vDataPtr eval();
 
     public:
         Tensor(vDims, std::vector<double> data, bool saveGradient = false);
@@ -79,10 +33,14 @@ class Tensor{
         std::vector<double> getData();
         vDims getDims();
 
+        void backward(Tensor grad = Tensor({1}, {1}));
+        Tensor getGradient();
+
         static Tensor zeroes(vDims);
         static Tensor ones(vDims);
+        static Tensor fill(vDims, double n);
 
-        //Tensor reshape(vDims new_dims);
+        //Tensor reshape(vDims);
         //Tensor transpose();
 
         Tensor add(Tensor);
@@ -124,5 +82,28 @@ class Tensor{
         Tensor softmax();
         //Tensor argmax();
 };
+
+struct TensorContents{
+    vDataPtr data;
+    size_t dataLen;
+    vDims dims;
+
+    bool evaluated;
+    bool saveGradient;
+    bool foundGradient = false;
+    Tensor gradient;
+
+    TensorContents(vDims, vDataPtr, bool saveGradient);
+    TensorContents(vDims, bool saveGradient);
+    virtual ~TensorContents() = default;
+
+    vDataPtr getData();
+    virtual operation getOp() {return DATA;}
+    virtual void eval() {};
+    virtual void backward(Tensor) {};
+
+    static vDataPtr evalTensor(Tensor);
+};
+
 #endif
 

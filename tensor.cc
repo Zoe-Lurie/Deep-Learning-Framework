@@ -3,34 +3,46 @@
 #include <vector>
 
 #include "tensor.h"
-#include "tensorfunction.cc"
+#include "tensorcontents.cc"
 
-#define MAKET(NAME, DIMS, ARGS) Tensor(DIMS, std::make_shared<TensorFunction##NAME>(TensorFunction##NAME ARGS))
-#define ADDARG(VAR) (VAR).contents->addArg()
+#define MAKET(NAME, ARGS) Tensor(std::make_shared<Tensor##NAME>(Tensor##NAME ARGS))
+//#define ADDARG(VAR, NUM) (VAR).contents->forwardArgs.push_back(std::pair(ret, NUM))
 
-Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient){
-    TensorContents cont = TensorContents(dims, std::make_shared<std::vector<double>>(data), saveGradient);
-    contents = std::make_shared<TensorContents>(cont);
+Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient) {
+    contents = std::make_shared<TensorContents>(TensorContents(dims, std::make_shared<std::vector<double>>(data), saveGradient));
 }
 
-Tensor::Tensor(vDims dims, TensorFunctionPtr ptr, bool saveGradient){
-    TensorContents cont = TensorContents(dims, ptr, saveGradient);
-    contents = std::make_shared<TensorContents>(cont);
+Tensor::Tensor(TensorContentsPtr ptr) : contents(ptr) {}
+
+vDataPtr Tensor::eval(){
+    if(!contents->evaluated){
+        //contents->optimize();
+        contents->eval();
+    }
+    return contents->data;
 }
 
-void Tensor::eval(){
-    //this->contents->optimize();
-    this->contents->eval();
+void Tensor::backward(Tensor grad){
+    if(contents->dims != grad.contents->dims) throw std::runtime_error("Dimenions of grad and tensor must match in backward");
+    if(!contents->saveGradient) return;
+
+    contents->gradient = contents->gradient + grad;
+    contents->backward(grad);
+}
+
+Tensor Tensor::getGradient(){
+    if(!contents->saveGradient) throw std::runtime_error("saveGradient in Tensor must be true");
+    if(!contents->foundGradient) throw std::runtime_error("Backward must have been called on an output to this Tensor");
+    return contents->gradient;
 }
 
 
 vDims Tensor::getDims(){
-    return contents->getDims();
+    return contents->dims;
 }
 
 std::vector<double> Tensor::getData(){
-    this->contents->eval();
-    return *(contents->getData().getData());
+    return *(eval().get());
 }
 
 void Tensor::print(){
@@ -48,16 +60,21 @@ Tensor Tensor::ones(vDims dims){
     return MAKET(Ones, dims, (dims));
 }
 
+Tensor Tensor::fill(vDims dims, double n){
+    return MAKET(Fill, dims, (dims, n));
+}
+
 Tensor Tensor::neg(){
-    ADDARG(*this);
-    return MAKET(Neg, getDims(), (this->contents));
+    Tensor ret =  MAKET(Neg, (contents->dims, false, *this));
+    //ADDARG(*this, 1);
+    return ret;
 }
 
 Tensor Tensor::add(Tensor x){
     if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::add");
-    ADDARG(*this);
-    ADDARG(x);
-    return MAKET(Add, getDims(), (this->contents, x.contents));
+    //ADDARG(*this);
+    //ADDARG(x);
+    return MAKET(Add, (getDims(), false, this->contents, x.contents));
 }
 
 Tensor Tensor::add(double x){
