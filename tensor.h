@@ -14,11 +14,11 @@ typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
     ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
     ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-    ONES, MATMUL, FILL, DATA};
+    ONES, MATMUL, FILL, DATA, REDUCESUM};
 
 
 class Tensor{
-    friend class TensorContents;
+    friend struct TensorContents;
     private:
         TensorContentsPtr contents;
 
@@ -36,74 +36,52 @@ class Tensor{
         void backward(Tensor grad = Tensor({1}, {1}));
         Tensor getGradient();
 
-        static Tensor zeroes(vDims);
-        static Tensor ones(vDims);
-        static Tensor fill(vDims, double n);
+        static Tensor ones(vDims, bool saveGradient = false);
+        static Tensor zeroes(vDims, bool saveGradient = false);
+        //static Tensor fill(vDims, double n);
 
         //Tensor reshape(vDims);
         //Tensor transpose();
 
-        Tensor add(Tensor);
+        Tensor add(Tensor, bool saveGradient = false);
         Tensor operator + (Tensor x) {return add(x);}
-        Tensor add(double);
-        Tensor operator + (double x) {return add(x);}
-        friend Tensor operator + (double n, Tensor x) {return x.add(n);}
+        //Tensor add(double);
+        //Tensor operator + (double x) {return add(x);}
+        //friend Tensor operator + (double n, Tensor x) {return x.add(n);}
 
-        Tensor subtract( Tensor);
+        Tensor subtract( Tensor, bool saveGradient = false);
         Tensor operator - (Tensor x) {return subtract(x);}
-        Tensor subtract(double);
-        Tensor operator - (double x) {return subtract(x);}
+        //Tensor subtract(double);
+        //Tensor operator - (double x) {return subtract(x);}
         //friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
 
-        Tensor elementwiseMult(Tensor);
+        Tensor elementwiseMult(Tensor, bool saveGradient = false);
         Tensor operator * (Tensor x) {return elementwiseMult(x);}
-        Tensor elementwiseMult(double);
+        Tensor elementwiseMult(double, bool saveGradient = false);
         Tensor operator * (double x) {return elementwiseMult(x);}
         friend Tensor operator * (double n, Tensor x) {return x.elementwiseMult(n);}
 
-        Tensor elementwiseDivision(Tensor);
-        Tensor operator / (Tensor x) {return elementwiseDivision(x);}
-        Tensor elementwiseDivision(double);
-        Tensor operator / (double x) {return elementwiseDivision(x);}
+        //Tensor elementwiseDivision(Tensor);
+        //Tensor operator / (Tensor x) {return elementwiseDivision(x);}
+        //Tensor elementwiseDivision(double);
+        //Tensor operator / (double x) {return elementwiseDivision(x);}
         //friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
 
-        Tensor neg();
-        Tensor reciprocal();
-        Tensor pow(double);
-        Tensor relu();
-        Tensor binarize();
-        Tensor exp();
+        Tensor neg(bool saveGradient = false);
+        //Tensor reciprocal();
+        Tensor pow(double, bool saveGradient = false);
+        //Tensor relu();
+        //Tensor binarize();
+        //Tensor exp();
 
-        Tensor matmul(Tensor);
+        //Tensor matmul(Tensor);
 
+        Tensor reduceSum(bool saveGradient = false);
         //Tensor reduceSum(size_t dim = 0);
         //Tensor reduceProd(size_t dim = 0);
         //Tensor reduceMean(size_t dim = 0);
-        Tensor softmax();
+        //Tensor softmax();
         //Tensor argmax();
 };
-
-struct TensorContents{
-    vDataPtr data;
-    size_t dataLen;
-    vDims dims;
-
-    bool evaluated;
-    bool saveGradient;
-    bool foundGradient = false;
-    Tensor gradient;
-
-    TensorContents(vDims, vDataPtr, bool saveGradient);
-    TensorContents(vDims, bool saveGradient);
-    virtual ~TensorContents() = default;
-
-    vDataPtr getData();
-    virtual operation getOp() {return DATA;}
-    virtual void eval() {};
-    virtual void backward(Tensor) {};
-
-    static vDataPtr evalTensor(Tensor);
-};
-
 #endif
 

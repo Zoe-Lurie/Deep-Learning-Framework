@@ -1,10 +1,23 @@
 #include <vector>
+#include <iostream>
 
 #include "tensor.h"
 
 
 int main(){
 
+    auto x = Tensor({2,3}, {1,2,3,3,2,1}, true);
+    auto y = Tensor({2,3}, {3,2,1,1,2,3}, true);
+
+    auto L = x.subtract(y, true).pow(3, true).reduceSum(true);
+
+    L.backward();
+
+    x.getGradient().print();
+    std::cout << "\n\n";
+    y.getGradient().print();
+
+    /*
     std::vector<double> data = {0,.1,.2,.3,.4};
     std::vector<double> data2 = {1,2,3,4,5};
 
@@ -26,6 +39,7 @@ int main(){
     auto t9 = t7.matmul(t8);
 
     t9.print();
+    */
 
     return 0;
 }

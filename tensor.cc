@@ -23,17 +23,19 @@ vDataPtr Tensor::eval(){
 }
 
 void Tensor::backward(Tensor grad){
-    if(contents->dims != grad.contents->dims) throw std::runtime_error("Dimenions of grad and tensor must match in backward");
+    if(contents->dims != grad.contents->dims) throw std::runtime_error("Dimenions of grad and tensor must match in backward in tensor with operation");
     if(!contents->saveGradient) return;
 
-    contents->gradient = contents->gradient + grad;
+    if(!contents->gradient) contents->gradient = std::make_shared<Tensor>(grad);
+    else contents->gradient = std::make_shared<Tensor>(*(contents->gradient) + grad);
     contents->backward(grad);
+    contents->foundGradient = true;
 }
 
 Tensor Tensor::getGradient(){
     if(!contents->saveGradient) throw std::runtime_error("saveGradient in Tensor must be true");
     if(!contents->foundGradient) throw std::runtime_error("Backward must have been called on an output to this Tensor");
-    return contents->gradient;
+    return *contents->gradient;
 }
 
 
@@ -42,7 +44,7 @@ vDims Tensor::getDims(){
 }
 
 std::vector<double> Tensor::getData(){
-    return *(eval().get());
+    return *(eval());
 }
 
 void Tensor::print(){
@@ -52,66 +54,76 @@ void Tensor::print(){
 }
 
 
-Tensor Tensor::zeroes(vDims dims){
-    return MAKET(Zeroes, dims, (dims));
+Tensor Tensor::zeroes(vDims dims, bool saveGradient){
+    return MAKET(Zeroes, (dims, saveGradient));
 }
 
-Tensor Tensor::ones(vDims dims){
-    return MAKET(Ones, dims, (dims));
+Tensor Tensor::ones(vDims dims, bool saveGradient){
+    return MAKET(Ones, (dims, saveGradient));
 }
 
+/*
 Tensor Tensor::fill(vDims dims, double n){
     return MAKET(Fill, dims, (dims, n));
 }
+*/
 
-Tensor Tensor::neg(){
-    Tensor ret =  MAKET(Neg, (contents->dims, false, *this));
+Tensor Tensor::neg(bool saveGradient){
+    Tensor ret =  MAKET(Neg, (contents->dims, saveGradient, *this));
     //ADDARG(*this, 1);
     return ret;
 }
 
-Tensor Tensor::add(Tensor x){
+Tensor Tensor::add(Tensor x, bool saveGradient){
     if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::add");
     //ADDARG(*this);
     //ADDARG(x);
-    return MAKET(Add, (getDims(), false, this->contents, x.contents));
+    return MAKET(Add, (contents->dims, saveGradient, *this, x));
 }
 
+/*
 Tensor Tensor::add(double x){
     ADDARG(*this);
     return MAKET(AddScalar, getDims(), (this->contents, x));
 }
+*/
 
-Tensor Tensor::subtract(Tensor x){
-    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::subtract");
-    ADDARG(*this);
-    ADDARG(x);
-    return MAKET(Subtract, getDims(), (this->contents, x.contents));
+Tensor Tensor::subtract(Tensor x, bool saveGradient){
+    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::add");
+    //ADDARG(*this);
+    //ADDARG(x);
+    return MAKET(Subtract, (contents->dims, saveGradient, *this, x));
 }
 
+/*
 Tensor Tensor::subtract(double x){
     ADDARG(*this);
     return MAKET(AddScalar, getDims(), (this->contents, -x));
 }
+*/
 
+/*
 Tensor Tensor::softmax(){
     if(getDims().size() != 1) throw std::runtime_error("Dimensions must be 1d in Tensor::softmax");
     ADDARG(*this);
     return MAKET(Softmax, getDims(), (this->contents));
 }
+*/
 
-Tensor Tensor::elementwiseMult(Tensor x){
-    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
-    ADDARG(*this);
-    ADDARG(x);
-    return MAKET(ElementwiseMult, getDims(), (this->contents, x.contents));
+Tensor Tensor::elementwiseMult(Tensor x, bool saveGradient){
+    if(getDims() != x.getDims() && !(x.getDims().size() == 1 && x.getDims()[0] == 1)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
+    //ADDARG(*this);
+    //ADDARG(x);
+    return MAKET(ElementwiseMult, (contents->dims, saveGradient, *this, x));
 }
 
-Tensor Tensor::elementwiseMult(double x){
-    ADDARG(*this);
-    return MAKET(ElementwiseMultScalar, getDims(), (this->contents, x));
+Tensor Tensor::elementwiseMult(double x, bool saveGradient){
+    Tensor ret =  MAKET(ElementwiseMultScalar, (contents->dims, saveGradient, *this, x));
+    //ADDARG(*this, 1);
+    return ret;
 }
 
+/*
 Tensor Tensor::elementwiseDivision(Tensor x){
     if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseDivision");
     ADDARG(*this);
@@ -131,12 +143,15 @@ Tensor Tensor::relu(){
 Tensor Tensor::binarize(){
     return MAKET(Binarize, getDims(), (this->contents));
 }
+*/
 
-Tensor Tensor::pow(double x){
-    ADDARG(*this);
-    return MAKET(Pow, getDims(), (this->contents, x));
+Tensor Tensor::pow(double x, bool saveGradient){
+    Tensor ret =  MAKET(Pow, (contents->dims, saveGradient, *this, x));
+    //ADDARG(*this, 1);
+    return ret;
 }
 
+/*
 Tensor Tensor::exp(){
     return MAKET(Exp, getDims(), (this->contents));
 }
@@ -165,5 +180,12 @@ Tensor Tensor::matmul(Tensor x){
     ADDARG(*this);
     ADDARG(x);
     return MAKET(Matmul, retdims, (this->contents, x.contents, retdims));
+}
+*/
+
+Tensor Tensor::reduceSum(bool saveGradient){
+    Tensor ret =  MAKET(ReduceSum, ({1}, saveGradient, *this));
+    //ADDARG(*this, 1);
+    return ret;
 }
 
