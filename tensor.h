@@ -11,12 +11,6 @@ typedef std::vector<size_t> vDims;
 typedef std::shared_ptr<std::vector<double>> vDataPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
-enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, ELEMENTWISEMULT,
-    ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
-    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-    ONES, MATMUL, FILL, DATA, REDUCESUM};
-
-
 class Tensor{
     friend struct TensorContents;
     private:
@@ -38,22 +32,22 @@ class Tensor{
 
         static Tensor ones(vDims, bool saveGradient = false);
         static Tensor zeroes(vDims, bool saveGradient = false);
-        //static Tensor fill(vDims, double n);
+        static Tensor fill(vDims, double n, bool saveGradient = false);
 
         //Tensor reshape(vDims);
         //Tensor transpose();
 
         Tensor add(Tensor, bool saveGradient = false);
         Tensor operator + (Tensor x) {return add(x);}
-        //Tensor add(double);
-        //Tensor operator + (double x) {return add(x);}
-        //friend Tensor operator + (double n, Tensor x) {return x.add(n);}
+        Tensor add(double, bool saveGradient = false);
+        Tensor operator + (double x) {return add(x);}
+        friend Tensor operator + (double n, Tensor x) {return x.add(n);}
 
         Tensor subtract( Tensor, bool saveGradient = false);
         Tensor operator - (Tensor x) {return subtract(x);}
-        //Tensor subtract(double);
-        //Tensor operator - (double x) {return subtract(x);}
-        //friend Tensor operator - (double n, Tensor x) {return x.subtract(n);}
+        Tensor subtract(double, bool saveGradient = false);
+        Tensor operator - (double x) {return subtract(x);}
+        friend Tensor operator - (double n, Tensor x) {return x.neg().add(n);}
 
         Tensor elementwiseMult(Tensor, bool saveGradient = false);
         Tensor operator * (Tensor x) {return elementwiseMult(x);}
@@ -70,8 +64,8 @@ class Tensor{
         Tensor neg(bool saveGradient = false);
         //Tensor reciprocal();
         Tensor pow(double, bool saveGradient = false);
-        //Tensor relu();
-        //Tensor binarize();
+        Tensor relu(bool saveGradient = false);
+        Tensor binarize(bool saveGradient = false);
         //Tensor exp();
 
         //Tensor matmul(Tensor);
