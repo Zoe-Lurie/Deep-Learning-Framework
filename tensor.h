@@ -13,7 +13,7 @@ typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 class Tensor{
     friend struct TensorContents;
-    friend struct TensorReshape;
+    friend class TensorReshape;
     private:
         TensorContentsPtr contents;
 

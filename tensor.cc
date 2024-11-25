@@ -150,7 +150,7 @@ Tensor Tensor::transpose(bool saveGradient){
 }
 
 Tensor Tensor::reshape(vDims dims, bool saveGradient){
-    size_t newDataLen = calculateDataLen(dims);
+    size_t newDataLen = TensorContents::calculateDataLen(dims);
     if(newDataLen != contents->dataLen) throw std::runtime_error("Dimensions do not match in reshape");
 
     return MAKET(Reshape, (dims, saveGradient, *this));

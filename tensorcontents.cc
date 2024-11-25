@@ -13,13 +13,6 @@ enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, SUBTRACTSCALAR,
     ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, 
     ONES, MATMUL, FILL, DATA, REDUCESUM, TRANSPOSE, RESHAPE};
 
-size_t calculateDataLen(vDims dims){
-    size_t dataLen = 1;
-    for(auto d : dims){
-        dataLen *= d;
-    }
-    return dataLen;
-}
 
 struct TensorContents{
     vDataPtr data;
@@ -37,6 +30,14 @@ struct TensorContents{
     virtual operation getOp() {return DATA;}
     virtual void eval() {};
     virtual void backward(Tensor) {};
+
+    static size_t calculateDataLen(vDims dims){
+        size_t dataLen = 1;
+        for(auto d : dims){
+            dataLen *= d;
+        }
+        return dataLen;
+    }
 
     TensorContents(vDims dims, vDataPtr data, bool saveGradient) : dims(dims), data(data), saveGradient(saveGradient) {
         evaluated = true;
@@ -459,7 +460,6 @@ class TensorReshape : public TensorContents{
         operation getOp() {return RESHAPE;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
             data = arg1.contents->data;
         }
 
