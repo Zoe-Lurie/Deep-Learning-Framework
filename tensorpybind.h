@@ -24,17 +24,20 @@ PYBIND11_MODULE(tensor, m){
         .def("reshape", &Tensor::reshape)
         .def("transpose", &Tensor::transpose)
 
-        .def("add", &Tensor::add)
+        .def("add", py::overload_cast<Tensor, bool>(&Tensor::add))
+        .def("add", py::overload_cast<double, bool>(&Tensor::add))
         .def(py::self + py::self)
         .def(py::self + double())
         .def(double() + py::self)
 
-        .add("subtract", &Tensor::subtract)
+        .def("subtract", py::overload_cast<Tensor, bool>(&Tensor::subtract))
+        .def("subtract", py::overload_cast<double, bool>(&Tensor::subtract))
         .def(py::self - py::self)
         .def(py::self - double())
         .def(double() - py::self)
 
-        .add("elementwiseMult", &Tensor::elementwiseMult)
+        .def("elementwiseMult", py::overload_cast<Tensor, bool>(&Tensor::elementwiseMult))
+        .def("elementwiseMult", py::overload_cast<double, bool>(&Tensor::elementwiseMult))
         .def(py::self * py::self)
         .def(py::self * double())
         .def(double() * py::self)
