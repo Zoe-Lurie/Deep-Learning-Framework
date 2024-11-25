@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 
-class Tensor;
 struct TensorContents;
 
 typedef std::vector<size_t> vDims;
@@ -27,12 +26,12 @@ class Tensor{
         std::vector<double> getData();
         vDims getDims();
 
-        void backward(Tensor grad = Tensor({1}, {1}));
-        Tensor getGradient();
-
         static Tensor ones(vDims, bool saveGradient = false);
         static Tensor zeroes(vDims, bool saveGradient = false);
         static Tensor fill(vDims, double n, bool saveGradient = false);
+
+        void backward(Tensor grad = Tensor::ones({1}));
+        Tensor getGradient();
 
         Tensor reshape(vDims, bool saveGradient = false);
         Tensor transpose(bool saveGradient = false);
@@ -59,7 +58,7 @@ class Tensor{
         //Tensor operator / (Tensor x) {return elementwiseDivision(x);}
         //Tensor elementwiseDivision(double);
         //Tensor operator / (double x) {return elementwiseDivision(x);}
-        //friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
+        //friend Tensor operator / (double n, Tensor x) {return x.reciprocal() * n;}
 
         Tensor neg(bool saveGradient = false);
         Tensor pow(double, bool saveGradient = false);

@@ -460,7 +460,7 @@ class TensorReshape : public TensorContents{
         operation getOp() {return RESHAPE;}
 
         void eval(){
-            data = arg1.contents->data;
+            data = evalTensor(arg1);
         }
 
         void backward(Tensor gradient){
