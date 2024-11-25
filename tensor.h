@@ -35,7 +35,7 @@ class Tensor{
         static Tensor fill(vDims, double n, bool saveGradient = false);
 
         //Tensor reshape(vDims);
-        //Tensor transpose();
+        Tensor transpose();
 
         Tensor add(Tensor, bool saveGradient = false);
         Tensor operator + (Tensor x) {return add(x);}
@@ -62,13 +62,11 @@ class Tensor{
         //friend Tensor operator / (double n, Tensor x) {return x.elementwiseDivision(n);}
 
         Tensor neg(bool saveGradient = false);
-        //Tensor reciprocal();
         Tensor pow(double, bool saveGradient = false);
         Tensor relu(bool saveGradient = false);
         Tensor binarize(bool saveGradient = false);
-        //Tensor exp();
 
-        //Tensor matmul(Tensor);
+        Tensor matmul(Tensor, bool saveGradient = false);
 
         Tensor reduceSum(bool saveGradient = false);
         //Tensor reduceSum(size_t dim = 0);

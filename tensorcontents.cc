@@ -1,4 +1,5 @@
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include "tensor.h"
@@ -94,8 +95,10 @@ class TensorAdd : public TensorContents{
         }
 
         void backward(Tensor gradient){
-            arg1.backward(gradient);
-            arg2.backward(gradient);
+            if(ISSCALAR(arg1)) arg1.backward(gradient.reduceSum());
+            else arg1.backward(gradient);
+            if(ISSCALAR(arg2)) arg2.backward(gradient.reduceSum());
+            else arg2.backward(gradient);
         }
 };
 
@@ -143,8 +146,10 @@ class TensorSubtract : public TensorContents{
         }
 
         void backward(Tensor gradient){
-            arg1.backward(gradient);
-            arg2.backward(gradient.neg());
+            if(ISSCALAR(arg1)) arg1.backward(gradient.reduceSum());
+            else arg1.backward(gradient);
+            if(ISSCALAR(arg2)) arg2.backward(gradient.reduceSum().neg());
+            else arg2.backward(gradient.neg());
         }
 };
 
@@ -298,8 +303,10 @@ class TensorElementwiseMult : public TensorContents{
         }
 
         void backward(Tensor gradient){
-            arg1.backward(arg2 * gradient);
-            arg2.backward(arg1 * gradient);
+            if(ISSCALAR(arg1)) arg1.backward((arg2 * gradient).reduceSum());
+            else arg1.backward(arg2 * gradient);
+            if(ISSCALAR(arg2)) arg2.backward((arg1 * gradient).reduceSum());
+            else arg2.backward(arg1 * gradient);
         }
 };
 
@@ -366,7 +373,45 @@ class TensorBinarize : public TensorContents{
         }
 
         void backward(Tensor gradient){
+            (void) gradient;
             arg1.backward(Tensor::zeroes(dims));
+        }
+};
+
+class TensorMatmul : public TensorContents{
+    Tensor arg1, arg2;
+    
+    public:
+        TensorMatmul(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+
+        operation getOp() {return MATMUL;}
+
+        void eval(){
+            double * data1 = evalTensor(arg1)->data();
+            double * data2 = evalTensor(arg2)->data();
+            data = MAKEDATA;
+            double * ret = data->data();
+
+            vDims data1Dims = arg1.getDims();
+            vDims data2Dims = arg2.getDims();
+
+            if(dims.size() == 2)
+                cpuMatmul2d(ret, data1, data2, dims[0], dims[1], data1Dims[1], data2Dims[1]);
+            else
+                cpuMatmul3d(ret, data1, data2, dims[0], dims[1], dims[2], data1Dims[1], data1Dims[2], data2Dims[1]);
+        }
+
+        void backward(Tensor gradient){
+            if(dims.size() == 2){
+                arg1.backward(gradient.matmul(arg2.transpose()));
+                arg2.backward(arg1.transpose().matmul(gradient));
+            }
+            else{
+                throw std::runtime_error("Backwards not yet implemented for batched tenor multiplication :(");
+                //arg1.backward(gradient.matmul(arg2.transpose()));
+                //arg2.backward();
+            }
         }
 };
 

@@ -95,14 +95,6 @@ Tensor Tensor::subtract(double x, bool saveGradient){
     return MAKET(SubtractScalar, (contents->dims, saveGradient, *this, x));
 }
 
-/*
-Tensor Tensor::softmax(){
-    if(getDims().size() != 1) throw std::runtime_error("Dimensions must be 1d in Tensor::softmax");
-    ADDARG(*this);
-    return MAKET(Softmax, getDims(), (this->contents));
-}
-*/
-
 Tensor Tensor::elementwiseMult(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
     return MAKET(ElementwiseMult, (contents->dims, saveGradient, *this, x));
@@ -111,20 +103,6 @@ Tensor Tensor::elementwiseMult(Tensor x, bool saveGradient){
 Tensor Tensor::elementwiseMult(double x, bool saveGradient){
     return MAKET(ElementwiseMultScalar, (contents->dims, saveGradient, *this, x));
 }
-
-/*
-Tensor Tensor::elementwiseDivision(Tensor x){
-    if(getDims() != x.getDims()) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseDivision");
-    ADDARG(*this);
-    ADDARG(x);
-    return MAKET(ElementwiseDivision, getDims(), (this->contents, x.contents));
-}
-
-Tensor Tensor::elementwiseDivision(double x){
-    ADDARG(*this);
-    return MAKET(ElementwiseDivisionScalar, getDims(), (this->contents, x));
-}
-*/
 
 Tensor Tensor::relu(bool saveGradient){
     return MAKET(Relu, (contents->dims, saveGradient, *this));
@@ -138,18 +116,9 @@ Tensor Tensor::pow(double x, bool saveGradient){
     return MAKET(Pow, (contents->dims, saveGradient, *this, x));
 }
 
-/*
-Tensor Tensor::exp(){
-    return MAKET(Exp, getDims(), (this->contents));
-}
-
-Tensor Tensor::reciprocal(){
-    return MAKET(Reciprocal, getDims(), (this->contents));
-}
-
-Tensor Tensor::matmul(Tensor x){
-    vDims dims = getDims();
-    vDims xdims = x.getDims();
+Tensor Tensor::matmul(Tensor x, bool saveGradient){
+    vDims dims = contents->dims;
+    vDims xdims = x.contents->dims;
     if(xdims.size() != 2){
       throw std::runtime_error("The right operand of matmul must be 2D tensors");
     }
@@ -164,11 +133,8 @@ Tensor Tensor::matmul(Tensor x){
     if(dims.size() == 2) retdims = {dims[0], xdims[1]};
     else retdims = {dims[0], dims[1], xdims[1]};
 
-    ADDARG(*this);
-    ADDARG(x);
-    return MAKET(Matmul, retdims, (this->contents, x.contents, retdims));
+    return MAKET(Matmul, (retdims, saveGradient, *this, x));
 }
-*/
 
 Tensor Tensor::reduceSum(bool saveGradient){
     return MAKET(ReduceSum, ({1}, saveGradient, *this));

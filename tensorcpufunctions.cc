@@ -87,3 +87,27 @@ void cpuBinarize(double * ret, double * data1, size_t dataLen){
     }
 }
 
+void cpuMatmul2d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t data1Dims1, size_t data2Dims1){
+    for(size_t i = 0; i < retDims0; ++i){
+        for(size_t j = 0; j < retDims1; ++j){
+            ret[i * retDims0 + j] = 0;
+            for(size_t k = 0; k < data1Dims1; ++k){
+                ret[i * retDims1 + j] += data1[i * data1Dims1 + k] * data2[k * data2Dims1 + j];
+            }
+        }
+    }
+}
+
+void cpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t retDims2, size_t data1Dims1, size_t data1Dims2, size_t data2Dims1){
+    for(size_t b = 0; b < retDims0; ++b){
+        for(size_t i = 0; i < retDims1; ++i){
+            for(size_t j = 0; j < retDims2; ++j){
+                ret[b * retDims2 * retDims1 + i * retDims1 + j] = 0;
+                for(size_t k = 0; k < data1Dims2; ++k){
+                    ret[b * retDims2 * retDims1 + i * retDims2 + j] += data1[b * data1Dims2 * data1Dims1 + i * data1Dims2 + k] * data2[k * data2Dims1 + j];
+                }
+            }
+        }
+    }
+}
+
