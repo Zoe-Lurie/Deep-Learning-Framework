@@ -17,7 +17,6 @@ int main(){
     std::cout << "\n\n";
     y.getGradient().print();
 
-    /*
     std::vector<double> data = {0,.1,.2,.3,.4};
     std::vector<double> data2 = {1,2,3,4,5};
 
@@ -31,15 +30,11 @@ int main(){
     auto t5 = t4 + 10;
     auto t6 = t5.elementwiseMult(t1);
     t6 = t5 - 0.5;
-    t6 = (2 * t6 - 12).reciprocal();
-    t6 = t6 / 2;
 
     auto t7 = Tensor({2,3}, data3);
     auto t8 = Tensor({3,2}, data4);
-    auto t9 = t7.matmul(t8);
 
-    t9.print();
-    */
+    t6.print();
 
     return 0;
 }

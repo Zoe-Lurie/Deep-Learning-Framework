@@ -6,7 +6,6 @@
 #include "tensorcontents.cc"
 
 #define MAKET(NAME, ARGS) Tensor(std::make_shared<Tensor##NAME>(Tensor##NAME ARGS))
-//#define ADDARG(VAR, NUM) (VAR).contents->forwardArgs.push_back(std::pair(ret, NUM))
 
 Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient) {
     contents = std::make_shared<TensorContents>(TensorContents(dims, std::make_shared<std::vector<double>>(data), saveGradient));

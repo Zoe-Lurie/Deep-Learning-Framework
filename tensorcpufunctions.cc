@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include "tensorfunctions.h"
+
 void cpuNeg(double * ret, double * data1, size_t dataLen){
     for(size_t i = 0; i < dataLen; ++i){
         ret[i] = -data1[i];
