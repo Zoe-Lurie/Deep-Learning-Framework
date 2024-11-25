@@ -1,5 +1,5 @@
-#ifndef TENSORFUNCTIONH
-#define TENSORFUNCTIONH
+#ifndef TENSORCPUFUNCTIONH
+#define TENSORCPUFUNCTIONH
 
 #include <cstdlib>
 

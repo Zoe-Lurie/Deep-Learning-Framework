@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "tensor.h"
-#include "tensorfunctions.h"
+#include "tensorcpufunctions.h"
 
 #define MAKEDATA std::make_shared<std::vector<double>>(std::vector<double>(dataLen));
 #define ISSCALAR(TENSOR) ((TENSOR).getDims().size() == 1 && (TENSOR).getDims()[0] == 1)

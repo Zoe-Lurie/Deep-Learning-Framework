@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "tensorfunctions.h"
+#include "tensorcpufunctions.h"
 
 void cpuNeg(double * ret, double * data1, size_t dataLen){
     for(size_t i = 0; i < dataLen; ++i){
