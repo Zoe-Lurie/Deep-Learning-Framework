@@ -16,6 +16,8 @@ int main(){
     x.getGradient().print();
     std::cout << "\n\n";
     y.getGradient().print();
+    std::cout << "\n\n";
+    y.getGradient().transpose().print();
 
     std::vector<double> data = {0,.1,.2,.3,.4};
     std::vector<double> data2 = {1,2,3,4,5};
@@ -34,7 +36,7 @@ int main(){
     auto t7 = Tensor({2,3}, data3);
     auto t8 = Tensor({3,2}, data4);
 
-    t6.print();
+    //t6.print();
 
     return 0;
 }

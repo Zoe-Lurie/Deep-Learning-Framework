@@ -13,6 +13,7 @@ typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 class Tensor{
     friend struct TensorContents;
+    friend struct TensorReshape;
     private:
         TensorContentsPtr contents;
 
@@ -21,7 +22,6 @@ class Tensor{
 
     public:
         Tensor(vDims, std::vector<double> data, bool saveGradient = false);
-        //Tensor(vDims dims, std::vector<std::vector<size_t>> idx, std::vector<double> val);
 
         void print();
         std::vector<double> getData();
@@ -34,8 +34,8 @@ class Tensor{
         static Tensor zeroes(vDims, bool saveGradient = false);
         static Tensor fill(vDims, double n, bool saveGradient = false);
 
-        //Tensor reshape(vDims);
-        Tensor transpose();
+        Tensor reshape(vDims, bool saveGradient = false);
+        Tensor transpose(bool saveGradient = false);
 
         Tensor add(Tensor, bool saveGradient = false);
         Tensor operator + (Tensor x) {return add(x);}

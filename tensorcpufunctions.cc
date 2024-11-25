@@ -111,3 +111,21 @@ void cpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, 
     }
 }
 
+void cpuTranspose2d(double * ret, double * data1, size_t retDims0, size_t retDims1){
+    for(size_t i = 0; i < retDims0; ++i){
+        for(size_t j = 0; j < retDims1; ++j){
+            ret[j * retDims0 + i] = data1[i * retDims1 + j];
+        }
+    }
+}
+
+void cpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDims1, size_t retDims2){
+    for(size_t b = 0; b < retDims0; ++b){
+        for(size_t i = 0; i < retDims1; ++i){
+            for(size_t j = 0; j < retDims2; ++j){
+                ret[b * retDims1 * retDims2 + j * retDims1 + i] = data1[b * retDims1 * retDims2 + i * retDims2 + j];
+            }
+        }
+    }
+}
+

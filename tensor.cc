@@ -140,3 +140,19 @@ Tensor Tensor::reduceSum(bool saveGradient){
     return MAKET(ReduceSum, ({1}, saveGradient, *this));
 }
 
+Tensor Tensor::transpose(bool saveGradient){
+    vDims retDims;
+    if(contents->dims.size() == 2) retDims = {contents->dims[1], contents->dims[0]};
+    else if(contents->dims.size() == 3) retDims = {contents->dims[0], contents->dims[2], contents->dims[1]};
+    else throw std::runtime_error("The tensor must be 2d or batched 2d tensors in transpose");
+
+    return MAKET(Transpose, (retDims, saveGradient, *this));
+}
+
+Tensor Tensor::reshape(vDims dims, bool saveGradient){
+    size_t newDataLen = calculateDataLen(dims);
+    if(newDataLen != contents->dataLen) throw std::runtime_error("Dimensions do not match in reshape");
+
+    return MAKET(Reshape, (dims, saveGradient, *this));
+}
+

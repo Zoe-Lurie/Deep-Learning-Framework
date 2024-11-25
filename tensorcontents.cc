@@ -10,13 +10,22 @@
 
 enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, SUBTRACTSCALAR,
     ELEMENTWISEMULT, ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
-    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, EXP, RECIPROCAL,
-    ONES, MATMUL, FILL, DATA, REDUCESUM};
+    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, 
+    ONES, MATMUL, FILL, DATA, REDUCESUM, TRANSPOSE, RESHAPE};
+
+size_t calculateDataLen(vDims dims){
+    size_t dataLen = 1;
+    for(auto d : dims){
+        dataLen *= d;
+    }
+    return dataLen;
+}
 
 struct TensorContents{
     vDataPtr data;
     size_t dataLen;
     vDims dims;
+    //vDims strides;
 
     bool evaluated;
     bool saveGradient;
@@ -31,20 +40,20 @@ struct TensorContents{
 
     TensorContents(vDims dims, vDataPtr data, bool saveGradient) : dims(dims), data(data), saveGradient(saveGradient) {
         evaluated = true;
+        dataLen = calculateDataLen(dims);
 
-        dataLen = 1;
-        for(auto d : dims){
-            dataLen *= d;
+        /*
+        strides = std::vector<size_t>(dims.size());
+        strides[dims.size() - 1] = 1;
+        for(size_t i = dims.size() - 2; i >= 0; --i){
+            strides[i] = strides[i+1] * dims[i+1];
         }
+        */
     }
 
     TensorContents(vDims dims, bool saveGradient) : dims(dims), saveGradient(saveGradient) {
         evaluated = false;
-        
-        dataLen = 1;
-        for(auto d : dims){
-            dataLen *= d;
-        }
+        dataLen = calculateDataLen(dims);
     }
 
     static vDataPtr evalTensor(Tensor t){
@@ -412,6 +421,50 @@ class TensorMatmul : public TensorContents{
                 //arg1.backward(gradient.matmul(arg2.transpose()));
                 //arg2.backward();
             }
+        }
+};
+
+class TensorTranspose : public TensorContents{
+    Tensor arg1;
+    
+    public:
+        TensorTranspose(vDims dims, bool saveGradient, Tensor arg1)
+            : arg1(arg1), TensorContents(dims, saveGradient) {}
+
+        operation getOp() {return TRANSPOSE;}
+
+        void eval(){
+            double * data1 = evalTensor(arg1)->data();
+            data = MAKEDATA;
+            double * ret = data->data();
+
+            if(dims.size() == 2)
+                cpuTranspose2d(ret, data1, dims[0], dims[1]);
+            else
+                cpuTranspose3d(ret, data1, dims[0], dims[1], dims[2]);
+        }
+
+        void backward(Tensor gradient){
+            arg1.backward(gradient.transpose());
+        }
+};
+
+class TensorReshape : public TensorContents{
+    Tensor arg1;
+    
+    public:
+        TensorReshape(vDims dims, bool saveGradient, Tensor arg1)
+            : arg1(arg1), TensorContents(dims, saveGradient) {}
+
+        operation getOp() {return RESHAPE;}
+
+        void eval(){
+            double * data1 = evalTensor(arg1)->data();
+            data = arg1.contents->data;
+        }
+
+        void backward(Tensor gradient){
+            arg1.backward(gradient.reshape(arg1.getDims()));
         }
 };
 
