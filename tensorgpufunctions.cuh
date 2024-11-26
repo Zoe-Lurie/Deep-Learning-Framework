@@ -22,12 +22,16 @@ __global__ void gpuOnes(double * ret, size_t dataLen);
 __global__ void gpuFill(double * ret, double n, size_t dataLen);
 __global__ void gpuElementwiseMult(double * ret, double * data1, double * data2, size_t dataLen);
 __global__ void gpuElementwiseMultScalar(double * ret, double * data1, double n, size_t dataLen);
+__global__ void gpuElementwiseDivision(double * ret, double * data1, double * data2, size_t dataLen);
+__global__ void gpuElementwiseDivisionScalar(double * ret, double * data1, double n, size_t dataLen);
+__global__ void gpuElementwiseDivisionScalar2(double * ret, double * data1, double n, size_t dataLen);
 __global__ void gpuRelu(double * ret, double * data1, size_t dataLen);
 __global__ void gpuBinarize(double * ret, double * data1, size_t dataLen);
 __global__ void gpuMatmul2d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t data1Dims1, size_t data2Dims1);
 __global__ void gpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t retDims2, size_t data1Dims1, size_t data1Dims2, size_t data2Dims1);
 __global__ void gpuTranspose2d(double * ret, double * data1, size_t retDims0, size_t retDims1);
 __global__ void gpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDims1, size_t retDims2);
+__global__ void gpuReduceSum(double * ret, double * data1, size_t dataLen);
 
 #endif
 

@@ -38,7 +38,7 @@ __global__ void gpuScalarSubtract(double * ret, double * data1, double n, size_t
 
 __global__ void gpuPow(double * ret, double * data1, double n, size_t dataLen){
     for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
-        ret[i] = std::pow(data1[i], n);
+        ret[i] = pow(data1[i], n);
     }
 }
 
@@ -75,6 +75,24 @@ __global__ void gpuElementwiseMultScalar(double * ret, double * data1, double n,
 __global__ void gpuRelu(double * ret, double * data1, size_t dataLen){
     for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
         ret[i] = data1[i] > 0 ? data1[i] : 0;
+    }
+}
+
+__global__ void gpuElementwiseDivision(double * ret, double * data1, double * data2, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = data1[i] / data2[i];
+    }
+}
+
+__global__ void gpuElementwiseDivisionScalar(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = data1[i] / n;
+    }
+}
+
+__global__ void gpuElementwiseDivisionScalar2(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = n / data1[i];
     }
 }
 
@@ -126,3 +144,10 @@ __global__ void gpuTranspose3d(double * ret, double * data1, size_t retDims0, si
     }
 }
 
+void gpuReduceSum(double * ret, double * data1, size_t dataLen){
+    // kernel must be started with <<<1,1>>>
+    ret[0] = 0;
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[0] += data1[i];
+    }
+}
