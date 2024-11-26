@@ -17,6 +17,10 @@
     #include "tensorgpuutility.h"
 #endif
 
+#ifdef OMP
+    #include <omp.h>
+#endif
+
 #define MAKET(NAME, ARGS) Tensor(std::make_shared<Tensor##NAME>(Tensor##NAME ARGS))
 
 Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient, deviceOptions device) {
@@ -38,6 +42,12 @@ Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient, deviceOp
 }
 
 Tensor::Tensor(TensorContentsPtr ptr) : contents(ptr) {}
+
+#ifdef OMP
+    void Tensor::setOmpNumThreads(int numThreads){
+        omp_set_num_threads(numThreads);
+    }
+#endif
 
 vDataPtr Tensor::eval(){
     if(!contents->evaluated){

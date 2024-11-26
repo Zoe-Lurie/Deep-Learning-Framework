@@ -3,9 +3,11 @@
 
 #include "tensor.h"
 
-#define OP(x, y) x.pow(2)
+#define OP(x, y) (x - y).pow(3).reduceSum();
 
 int main(){
+
+    Tensor::setOmpNumThreads(8);
 
     std::cout << "CPU output:\n";
 
@@ -15,13 +17,15 @@ int main(){
     auto cL = OP(cx, cy);
     cL.print();
 
-    cL.backward(Tensor::ones({2,3}, CPU));
+    //cL.backward(Tensor::ones({2,3}, CPU));
+    cL.backward();
 
     std::cout << "\n";
     cx.getGradient().print();
     std::cout << "\n";
-    //cy.getGradient().print();
+    cy.getGradient().print();
 
+/*
     std::cout << "GPU output:\n";
 
     auto x = Tensor({2,3}, {1,2,3,3,2,1}, true, GPU);
@@ -36,6 +40,7 @@ int main(){
     x.getGradient().print();
     std::cout << "\n";
     //y.getGradient().print();
+    */
 
     return 0;
 }

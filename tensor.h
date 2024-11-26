@@ -69,6 +69,10 @@ class Tensor{
          */
         vDims getDims();
 
+        #ifdef OMP
+            static void setOmpNumThreads(int numThreads);
+        #endif
+
         /**
          * @brief Creates a tensor filled with ones.
          * 
