@@ -1,11 +1,23 @@
 #include <memory>
 #include <stdexcept>
-#include <vector>
 
 #include "tensor.h"
-#include "tensorcpufunctions.h"
 
-#define MAKEDATA std::make_shared<std::vector<double>>(std::vector<double>(dataLen));
+//#define CUDA
+#ifdef CUDA
+    #include "tensorgpufunctions.cuh"
+    #include "tensorgpuutility.cuh"
+    
+    #define CALLFUNC(NAME, ARGS) if(onGPU) gpu##NAME ARGS; else cpu##NAME ARGS;
+    #define MAKEDATA \
+            (onGPU) ? TensorGPUUtility::allocate(dataLen) : \
+                std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
+#else // no CUDA
+    #include "tensorcpufunctions.h"
+    #define CALLFUNC(NAME, ARGS) cpu##NAME ARGS;
+    #define MAKEDATA std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
+#endif
+
 #define ISSCALAR(TENSOR) ((TENSOR).getDims().size() == 1 && (TENSOR).getDims()[0] == 1)
 
 enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, SUBTRACTSCALAR,
@@ -16,6 +28,8 @@ enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, SUBTRACTSCALAR,
 
 struct TensorContents{
     vDataPtr data;
+    bool onGPU = false;
+
     size_t dataLen;
     vDims dims;
 
@@ -38,16 +52,10 @@ struct TensorContents{
         return dataLen;
     }
 
-    TensorContents(vDims dims, vDataPtr data, bool saveGradient) : dims(dims), data(data), saveGradient(saveGradient) {
-        evaluated = true;
-        dataLen = calculateDataLen(dims);
+    TensorContents(vDims dims, vDataPtr data, bool saveGradient)
+        : dims(dims), data(data), saveGradient(saveGradient), evaluated(true), dataLen(calculateDataLen(dims)) {}
 
-    }
-
-    TensorContents(vDims dims, bool saveGradient) : dims(dims), saveGradient(saveGradient) {
-        evaluated = false;
-        dataLen = calculateDataLen(dims);
-    }
+    TensorContents(vDims dims, bool saveGradient) : dims(dims), saveGradient(saveGradient), evaluated(false), dataLen(calculateDataLen(dims)) {}
 
     static vDataPtr evalTensor(Tensor t){
         return t.eval();
@@ -64,11 +72,11 @@ class TensorNeg : public TensorContents{
         operation getOp() {return NEG;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuNeg(ret, data1, dataLen);
+            CALLFUNC(Neg, (ret, data1, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -86,14 +94,14 @@ class TensorAdd : public TensorContents{
         operation getOp() {return ADD;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
-            double * data2 = evalTensor(arg2)->data();
+            double * data1 = evalTensor(arg1).get();
+            double * data2 = evalTensor(arg2).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            if(ISSCALAR(arg1)) cpuAddScalar(ret, data2, data1[0], dataLen);
-            else if(ISSCALAR(arg2)) cpuAddScalar(ret, data1, data2[0], dataLen);
-            else cpuAdd(ret, data1, data2, dataLen);
+            if(ISSCALAR(arg1)) {CALLFUNC(AddScalar, (ret, data2, data1[0], dataLen));}
+            else if(ISSCALAR(arg2)) {CALLFUNC(AddScalar, (ret, data1, data2[0], dataLen));}
+            else {CALLFUNC(Add, (ret, data1, data2, dataLen));}
         }
 
         void backward(Tensor gradient){
@@ -115,11 +123,11 @@ class TensorAddScalar : public TensorContents{
         operation getOp() {return ADDSCALAR;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuAddScalar(ret, data1, n, dataLen);
+            CALLFUNC(AddScalar, (ret, data1, n, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -137,14 +145,14 @@ class TensorSubtract : public TensorContents{
         operation getOp() {return SUBTRACT;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
-            double * data2 = evalTensor(arg2)->data();
+            double * data1 = evalTensor(arg1).get();
+            double * data2 = evalTensor(arg2).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            if(ISSCALAR(arg1)) cpuScalarSubtract(ret, data2, data1[0], dataLen);
-            else if(ISSCALAR(arg2)) cpuSubtractScalar(ret, data1, data2[0], dataLen);
-            else cpuSubtract(ret, data1, data2, dataLen);
+            if(ISSCALAR(arg1)) {CALLFUNC(ScalarSubtract, (ret, data2, data1[0], dataLen));}
+            else if(ISSCALAR(arg2)) {CALLFUNC(SubtractScalar, (ret, data1, data2[0], dataLen));}
+            else {CALLFUNC(Subtract, (ret, data1, data2, dataLen));}
         }
 
         void backward(Tensor gradient){
@@ -166,11 +174,11 @@ class TensorSubtractScalar : public TensorContents{
         operation getOp() {return SUBTRACTSCALAR;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuSubtractScalar(ret, data1, n, dataLen);
+            CALLFUNC(SubtractScalar, (ret, data1, n, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -189,11 +197,11 @@ class TensorPow : public TensorContents{
         operation getOp() {return POW;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuPow(ret, data1, n, dataLen);
+            CALLFUNC(Pow, (ret, data1, n, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -213,14 +221,11 @@ class TensorReduceSum : public TensorContents{
 
         void eval(){
             auto dataV1 = evalTensor(arg1);
-            double * data1 = dataV1->data();
+            double * data1 = dataV1.get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            ret[0] = 0;
-            for(size_t i = 0; i < dataV1->size(); ++i){
-                ret[0] += data1[i];
-            }
+            CALLFUNC(ReduceSum, (ret, data1, arg1.contents->dataLen));
         }
 
         void backward(Tensor gradient){
@@ -236,9 +241,9 @@ class TensorZeroes : public TensorContents{
 
         void eval(){
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuZeroes(ret, dataLen);
+            CALLFUNC(Zeroes, (ret, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -254,9 +259,9 @@ class TensorOnes : public TensorContents{
 
         void eval(){
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuOnes(ret, dataLen);
+            CALLFUNC(Ones, (ret, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -274,9 +279,9 @@ class TensorFill : public TensorContents{
 
         void eval(){
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuFill(ret, n, dataLen);
+            CALLFUNC(Fill, (ret, n, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -294,14 +299,14 @@ class TensorElementwiseMult : public TensorContents{
         operation getOp() {return ELEMENTWISEMULT;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
-            double * data2 = evalTensor(arg2)->data();
+            double * data1 = evalTensor(arg1).get();
+            double * data2 = evalTensor(arg2).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            if(ISSCALAR(arg1)) cpuElementwiseMultScalar(ret, data2, data1[0], dataLen);
-            else if(ISSCALAR(arg2)) cpuElementwiseMultScalar(ret, data1, data2[0], dataLen);
-            else cpuElementwiseMult(ret, data1, data2, dataLen);
+            if(ISSCALAR(arg1)) {CALLFUNC(ElementwiseMultScalar, (ret, data2, data1[0], dataLen));}
+            else if(ISSCALAR(arg2)) {CALLFUNC(ElementwiseMultScalar, (ret, data1, data2[0], dataLen));}
+            else {CALLFUNC(ElementwiseMult, (ret, data1, data2, dataLen));}
         }
 
         void backward(Tensor gradient){
@@ -323,11 +328,11 @@ class TensorElementwiseMultScalar : public TensorContents{
         operation getOp() {return ELEMENTWISEMULTSCALAR;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuElementwiseMultScalar(ret, data1, n, dataLen);
+            CALLFUNC(ElementwiseMultScalar, (ret, data1, n, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -345,11 +350,11 @@ class TensorRelu : public TensorContents{
         operation getOp() {return RELU;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuRelu(ret, data1, dataLen);
+            CALLFUNC(Relu, (ret, data1, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -367,11 +372,11 @@ class TensorBinarize : public TensorContents{
         operation getOp() {return BINARIZE;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuBinarize(ret, data1, dataLen);
+            CALLFUNC(Binarize, (ret, data1, dataLen));
         }
 
         void backward(Tensor gradient){
@@ -390,18 +395,18 @@ class TensorMatmul : public TensorContents{
         operation getOp() {return MATMUL;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
-            double * data2 = evalTensor(arg2)->data();
+            double * data1 = evalTensor(arg1).get();
+            double * data2 = evalTensor(arg2).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
             vDims data1Dims = arg1.getDims();
             vDims data2Dims = arg2.getDims();
 
             if(dims.size() == 2)
-                cpuMatmul2d(ret, data1, data2, dims[0], dims[1], data1Dims[1], data2Dims[1]);
+                {CALLFUNC(Matmul2d, (ret, data1, data2, dims[0], dims[1], data1Dims[1], data2Dims[1]));}
             else
-                cpuMatmul3d(ret, data1, data2, dims[0], dims[1], dims[2], data1Dims[1], data1Dims[2], data2Dims[1]);
+                {CALLFUNC(Matmul3d, (ret, data1, data2, dims[0], dims[1], dims[2], data1Dims[1], data1Dims[2], data2Dims[1]));}
         }
 
         void backward(Tensor gradient){
@@ -427,14 +432,14 @@ class TensorTranspose : public TensorContents{
         operation getOp() {return TRANSPOSE;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
             if(dims.size() == 2)
-                cpuTranspose2d(ret, data1, dims[0], dims[1]);
+                {CALLFUNC(Transpose2d, (ret, data1, dims[0], dims[1]));}
             else
-                cpuTranspose3d(ret, data1, dims[0], dims[1], dims[2]);
+                {CALLFUNC(Transpose3d, (ret, data1, dims[0], dims[1], dims[2]));}
         }
 
         void backward(Tensor gradient){
@@ -470,14 +475,14 @@ class TensorElementwiseDivision : public TensorContents{
         operation getOp() {return ELEMENTWISEDIVISION;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
-            double * data2 = evalTensor(arg2)->data();
+            double * data1 = evalTensor(arg1).get();
+            double * data2 = evalTensor(arg2).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            if(ISSCALAR(arg1)) cpuElementwiseDivisionScalar2(ret, data2, data1[0], dataLen);
-            else if(ISSCALAR(arg2)) cpuElementwiseDivisionScalar(ret, data1, data2[0], dataLen);
-            else cpuElementwiseDivision(ret, data1, data2, dataLen);
+            if(ISSCALAR(arg1)) {CALLFUNC(ElementwiseDivisionScalar2, (ret, data2, data1[0], dataLen));}
+            else if(ISSCALAR(arg2)) {CALLFUNC(ElementwiseDivisionScalar, (ret, data1, data2[0], dataLen));}
+            else {CALLFUNC(ElementwiseDivision, (ret, data1, data2, dataLen));}
         }
 
         void backward(Tensor gradient){
@@ -499,11 +504,11 @@ class TensorElementwiseDivisionScalar : public TensorContents{
         operation getOp() {return ELEMENTWISEDIVISIONSCALAR;}
 
         void eval(){
-            double * data1 = evalTensor(arg1)->data();
+            double * data1 = evalTensor(arg1).get();
             data = MAKEDATA;
-            double * ret = data->data();
+            double * ret = data.get();
 
-            cpuElementwiseDivisionScalar(ret, data1, n, dataLen);
+            CALLFUNC(ElementwiseDivisionScalar, (ret, data1, n, dataLen));
         }
 
         void backward(Tensor gradient){

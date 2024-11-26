@@ -5,10 +5,16 @@
 #include "tensor.h"
 #include "tensorcontents.cc"
 
+#ifdef CUDA
+    #include "tensorgpuutility.cuh"
+#endif
+
 #define MAKET(NAME, ARGS) Tensor(std::make_shared<Tensor##NAME>(Tensor##NAME ARGS))
 
 Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient) {
-    contents = std::make_shared<TensorContents>(TensorContents(dims, std::make_shared<std::vector<double>>(data), saveGradient));
+    contents = std::make_shared<TensorContents>(
+            TensorContents(dims, std::make_shared<double>(new double[data.size()], std::default_delete<double[]>()), saveGradient));
+    std::copy(data.begin(), data.end(), contents->data.get());
 }
 
 Tensor::Tensor(TensorContentsPtr ptr) : contents(ptr) {}
@@ -43,7 +49,14 @@ vDims Tensor::getDims(){
 }
 
 std::vector<double> Tensor::getData(){
-    return *(eval());
+    std::vector<double> ret;
+
+    #ifdef CUDA
+        if(contents->onGPU) toCPU();
+    #endif
+
+    ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
+    return ret;
 }
 
 void Tensor::print(){
@@ -51,6 +64,22 @@ void Tensor::print(){
     for(auto d : data)
         printf("%f\n", d);
 }
+
+#ifdef CUDA
+void Tensor::toGPU(){
+    double * tmp;
+    TensorGPUUtility::toGPU(contents->data.get(), tmp, contents->dataLen);
+    contents->data = std::shared_ptr<double>(tmp, cudaFree);
+    contents->onGPU = true;
+}
+
+void Tensor::toCPU(){
+    double * tmp = new double[contents->dataLen];
+    TensorGPUUtility::toCPU(tmp, contents->data.get(), contents->dataLen);
+    contents->data = std::shared_ptr<double>(tmp, std::default_delete<double[]>());
+    contents->onGPU = false;
+}
+#endif
 
 
 bool isBroadcastable(vDims d1, vDims d2){

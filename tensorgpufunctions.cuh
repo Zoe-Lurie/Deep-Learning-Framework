@@ -31,6 +31,7 @@ __global__ void gpuMatmul2d(double * ret, double * data1, double * data2, size_t
 __global__ void gpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t retDims2, size_t data1Dims1, size_t data1Dims2, size_t data2Dims1);
 __global__ void gpuTranspose2d(double * ret, double * data1, size_t retDims0, size_t retDims1);
 __global__ void gpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDims1, size_t retDims2);
+__global__ void gpuReduceSum(double * ret, double * data1, size_t dataLen);
 
 #endif
 

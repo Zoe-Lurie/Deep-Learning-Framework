@@ -7,12 +7,13 @@
 struct TensorContents;
 
 typedef std::vector<size_t> vDims;
-typedef std::shared_ptr<std::vector<double>> vDataPtr;
+typedef std::shared_ptr<double> vDataPtr;
 typedef std::shared_ptr<TensorContents> TensorContentsPtr;
 
 class Tensor{
     friend struct TensorContents;
     friend class TensorReshape;
+    friend class TensorReduceSum;
     private:
         TensorContentsPtr contents;
 
@@ -25,6 +26,11 @@ class Tensor{
         void print();
         std::vector<double> getData();
         vDims getDims();
+
+#ifdef CUDA
+      void toGPU();
+      void toCPU();
+#endif
 
         static Tensor ones(vDims, bool saveGradient = false);
         static Tensor zeroes(vDims, bool saveGradient = false);
