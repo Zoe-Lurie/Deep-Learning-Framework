@@ -38,7 +38,7 @@ __global__ void gpuScalarSubtract(double * ret, double * data1, double n, size_t
 
 __global__ void gpuPow(double * ret, double * data1, double n, size_t dataLen){
     for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
-        ret[i] = std::pow(data1[i], n);
+        ret[i] = pow(data1[i], n);
     }
 }
 
