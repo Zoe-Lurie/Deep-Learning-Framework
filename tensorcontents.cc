@@ -18,11 +18,13 @@
 #include "tensor.h"
 #include "tensorcpufunctions.h"
 
+
 //#define CUDA
 #ifdef CUDA
-    #include "tensorgpuutility.cuh"
+    #include "tensorgpuutility.h"
+    #include "tensorgpufunctions.h"
     
-    #define CALLFUNC(NAME, ARGS) if(onGPU) TensorGPUUtility::gpuS##NAME ARGS; else cpu##NAME ARGS;
+    #define CALLFUNC(NAME, ARGS) if(onGPU) gpuS##NAME ARGS; else cpu##NAME ARGS;
     #define MAKEDATA \
             (onGPU) ? TensorGPUUtility::allocate(dataLen) : \
                 std::shared_ptr<double>(new double[dataLen], std::default_delete<double[]>());

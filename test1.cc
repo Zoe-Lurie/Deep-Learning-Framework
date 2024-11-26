@@ -5,9 +5,8 @@
 
 int main(){
 
-    auto x = Tensor({2,3}, {1,2,3,3,2,1}, true);
-    auto y = Tensor({2,3}, {3,2,1,1,2,3}, true);
-    auto z = Tensor({3,2}, {0,1,2,3,4,5}, true);
+    auto x = Tensor({2,3}, {1,2,3,3,2,1}, true, GPU);
+    auto y = Tensor({2,3}, {3,2,1,1,2,3}, true, GPU);
 
     auto L = (x - y).pow(3).reduceSum();
     L.print();

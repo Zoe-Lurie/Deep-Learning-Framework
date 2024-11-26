@@ -14,7 +14,7 @@
 #include "tensorcontents.cc"
 
 #ifdef CUDA
-    #include "tensorgpuutility.cuh"
+    #include "tensorgpuutility.h"
 #endif
 
 #define MAKET(NAME, ARGS) Tensor(std::make_shared<Tensor##NAME>(Tensor##NAME ARGS))
@@ -73,7 +73,7 @@ std::vector<double> Tensor::getData(){
     std::vector<double> ret;
 
     #ifdef CUDA
-        if(contents->onGPU) toCPU(ret.data(), contents->data.get(), contents->dataLen);
+        if(contents->onGPU) TensorGPUUtility::toCPU(ret.data(), contents->data.get(), contents->dataLen);
     #endif
 
     ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
