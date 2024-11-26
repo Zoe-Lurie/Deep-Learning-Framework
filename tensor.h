@@ -1,17 +1,15 @@
 /**
  * @file tensor.h
  * @brief Defines the Tensor class and related structures for multidimensional array manipulation with support for gradients and device allocation.
- * 
- * @author Zoe Lurie
- * @date November 2024
- */
-
-/*
- * Documentation generated with the help of ChatGPT with the following queries, the output of which was then modified:
+ *
+ * @note Documentation of methods in this file was generated with the help of ChatGPT with the following queries, the output of which were then modified:
  *      Generate documentation for the public methods of the following header file: **This file attached**
  *      can you save this as docstrings I can copy and paste back into my original file?
  *      you missed binarize, neg, pow, softmax, output the docstrings of just those
  *      you missed add, subtract, elementwisemult, elementwisedivision, output the docstrings of just those
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
  */
 
 #ifndef TENSORH

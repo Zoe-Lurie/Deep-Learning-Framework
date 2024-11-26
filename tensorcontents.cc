@@ -3,15 +3,13 @@
  * @brief Defines and implements the abstract TensorContents struct, which contains the internal
  * structure of a Tensor, including data, gradient, and other informations. Defines and implements
  * the child classes of TensorContents, each representing a Tensor function, providing
- * functionality to evaluate the function and get the gradient of the function with respect to the
- * inputs.
+ * functionality to lazily evaluate the function and get the gradient of the function with
+ * respect to the inputs.
+ *
+ * @note Derivates of functions taken from: https://github.com/HIPS/autograd/blob/master/autograd/numpy/numpy_vjps.py
  * 
  * @author Zoe Lurie
  * @date November 2024
- */
-
-/*
- * Derivates of functions taken from: https://github.com/HIPS/autograd/blob/master/autograd/numpy/numpy_vjps.py
  */
 
 #include <memory>
