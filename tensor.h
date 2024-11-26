@@ -46,7 +46,7 @@ class Tensor{
         Tensor operator - (Tensor x) {return subtract(x);}
         Tensor subtract(double, bool saveGradient = false);
         Tensor operator - (double x) {return subtract(x);}
-        friend Tensor operator - (double n, Tensor x) {return Tensor({1}, {n}).subtract(x);}
+        friend Tensor operator - (double n, Tensor x) {return fill({1}, n).subtract(x);}
 
         Tensor elementwiseMult(Tensor, bool saveGradient = false);
         Tensor operator * (Tensor x) {return elementwiseMult(x);}
@@ -58,12 +58,13 @@ class Tensor{
         Tensor operator / (Tensor x) {return elementwiseDivision(x);}
         Tensor elementwiseDivision(double, bool saveGradient = false);
         Tensor operator / (double x) {return elementwiseDivision(x);}
-        friend Tensor operator / (double n, Tensor x) {return Tensor({1}, {n}).elementwiseDivision(x);}
+        friend Tensor operator / (double n, Tensor x) {return fill({1}, n).elementwiseDivision(x);}
 
         Tensor neg(bool saveGradient = false);
         Tensor pow(double, bool saveGradient = false);
         Tensor relu(bool saveGradient = false);
         Tensor binarize(bool saveGradient = false);
+        Tensor reciprocal(bool saveGradient = false) {return ones({1}).elementwiseDivision(*this, saveGradient);}
 
         Tensor matmul(Tensor, bool saveGradient = false);
 
@@ -71,7 +72,7 @@ class Tensor{
         //Tensor reduceSum(size_t dim = 0);
         //Tensor reduceProd(size_t dim = 0);
         //Tensor reduceMean(size_t dim = 0);
-        //Tensor softmax();
+        Tensor softmax(bool saveGradient = false) {return this->elementwiseDivision(this->reduceSum(saveGradient), saveGradient);}
         //Tensor argmax();
 };
 #endif

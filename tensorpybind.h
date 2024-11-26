@@ -56,11 +56,13 @@ PYBIND11_MODULE(tensor, m){
         .def("__pow__", [](Tensor a, double b) {return a.pow(b);}, py::is_operator())
         .def("relu", &Tensor::relu)
         .def("binarize", &Tensor::binarize)
+        .def("reciprocal", &Tensor::reciprocal)
 
         .def("matmul", &Tensor::matmul)
         .def("__matmul__", [](Tensor a, Tensor b) {return a.matmul(b);}, py::is_operator())
 
         .def("reduceSum", &Tensor::reduceSum)
+        .def("softmax", &Tensor::softmax)
         ;
 }
 
