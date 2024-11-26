@@ -1,3 +1,10 @@
+/**
+ * @file tensor.h
+ * @brief Defines the Tensor class and related structures for multidimensional array manipulation with support for gradients and device allocation.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
 
 /*
  * Documentation generated with the help of ChatGPT with the following queries, the output of which was then modified:

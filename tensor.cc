@@ -1,3 +1,11 @@
+/**
+ * @file tensor.cc
+ * @brief Implements the methods of the Tensor class.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #include <memory>
 #include <stdexcept>
 #include <vector>
