@@ -46,7 +46,7 @@ class Tensor{
         Tensor operator - (Tensor x) {return subtract(x);}
         Tensor subtract(double, bool saveGradient = false);
         Tensor operator - (double x) {return subtract(x);}
-        friend Tensor operator - (double n, Tensor x) {return Tensor({1}, {n}) - x;}
+        friend Tensor operator - (double n, Tensor x) {return Tensor({1}, {n}).subtract(x);}
 
         Tensor elementwiseMult(Tensor, bool saveGradient = false);
         Tensor operator * (Tensor x) {return elementwiseMult(x);}
@@ -58,7 +58,7 @@ class Tensor{
         Tensor operator / (Tensor x) {return elementwiseDivision(x);}
         Tensor elementwiseDivision(double, bool saveGradient = false);
         Tensor operator / (double x) {return elementwiseDivision(x);}
-        friend Tensor operator / (double n, Tensor x) {return Tensor({1}, {n}) / x;}
+        friend Tensor operator / (double n, Tensor x) {return Tensor({1}, {n}).elementwiseDivision(x);}
 
         Tensor neg(bool saveGradient = false);
         Tensor pow(double, bool saveGradient = false);

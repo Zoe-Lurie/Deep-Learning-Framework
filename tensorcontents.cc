@@ -507,6 +507,7 @@ class TensorElementwiseDivisionScalar : public TensorContents{
         }
 
         void backward(Tensor gradient){
-            arg1.backward(gradient * n);
+            arg1.backward(gradient / n);
         }
 };
+

@@ -59,6 +59,12 @@ bool isBroadcastable(vDims d1, vDims d2){
         (d2.size() == 1 && d2[0] == 1);
 }
 
+vDims getBroadcastDims(vDims d1, vDims d2){
+    if(d1 == d2) return d1;
+    if(d1.size() == 1) return d2;
+    return d1;
+}
+
 
 Tensor Tensor::zeroes(vDims dims, bool saveGradient){
     return MAKET(Zeroes, (dims, saveGradient));
@@ -81,7 +87,7 @@ Tensor Tensor::neg(bool saveGradient){
 Tensor Tensor::add(Tensor x, bool saveGradient){
     saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::add");
-    return MAKET(Add, (contents->dims, saveGradient, *this, x));
+    return MAKET(Add, (getBroadcastDims(contents->dims, x.contents->dims), saveGradient, *this, x));
 }
 
 Tensor Tensor::add(double x, bool saveGradient){
@@ -92,7 +98,7 @@ Tensor Tensor::add(double x, bool saveGradient){
 Tensor Tensor::subtract(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::add");
     saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
-    return MAKET(Subtract, (contents->dims, saveGradient, *this, x));
+    return MAKET(Subtract, (getBroadcastDims(contents->dims, x.contents->dims), saveGradient, *this, x));
 }
 
 Tensor Tensor::subtract(double x, bool saveGradient){
@@ -103,7 +109,7 @@ Tensor Tensor::subtract(double x, bool saveGradient){
 Tensor Tensor::elementwiseMult(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
     saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
-    return MAKET(ElementwiseMult, (contents->dims, saveGradient, *this, x));
+    return MAKET(ElementwiseMult, (getBroadcastDims(contents->dims, x.contents->dims), saveGradient, *this, x));
 }
 
 Tensor Tensor::elementwiseMult(double x, bool saveGradient){
@@ -114,7 +120,7 @@ Tensor Tensor::elementwiseMult(double x, bool saveGradient){
 Tensor Tensor::elementwiseDivision(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseDivision");
     saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
-    return MAKET(ElementwiseDivision, (contents->dims, saveGradient, *this, x));
+    return MAKET(ElementwiseDivision, (getBroadcastDims(contents->dims, x.contents->dims), saveGradient, *this, x));
 }
 
 Tensor Tensor::elementwiseDivision(double x, bool saveGradient){
