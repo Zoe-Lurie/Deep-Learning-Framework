@@ -78,6 +78,24 @@ __global__ void gpuRelu(double * ret, double * data1, size_t dataLen){
     }
 }
 
+__global__ void gpuElementwiseDivision(double * ret, double * data1, double * data2, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = data1[i] / data2[i];
+    }
+}
+
+__global__ void gpuElementwiseDivisionScalar(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = data1[i] / n;
+    }
+}
+
+__global__ void gpuElementwiseDivisionScalar2(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
+        ret[i] = n / data1[i];
+    }
+}
+
 __global__ void gpuBinarize(double * ret, double * data1, size_t dataLen){
     for(size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < dataLen; i += NUMBLOCKS * NUMTHREADS){
         ret[i] = data1[i] > 0 ? 1 : 0;
