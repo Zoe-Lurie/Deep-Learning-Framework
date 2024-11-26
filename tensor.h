@@ -1,6 +1,7 @@
 /**
  * @file tensor.h
- * @brief Defines the Tensor class and related structures for multidimensional array manipulation with support for gradients and device allocation.
+ * @brief Defines the Tensor class and related structures for multidimensional array manipulation with support
+ * for autodifferentiation, multithreaded CPU and GPU algorithms, and lazy evaluation.
  *
  * @note Documentation of methods in this file was generated with the help of ChatGPT with the following queries, the output of which were then modified:
  *      Generate documentation for the public methods of the following header file: **This file attached**
@@ -70,6 +71,10 @@ class Tensor{
         vDims getDims();
 
         #ifdef OMP
+            /**
+             * @brief Sets the number of threads for omp globally
+             * @param numThreads Number of threads to use.
+             */
             static void setOmpNumThreads(int numThreads);
         #endif
 

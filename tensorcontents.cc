@@ -234,7 +234,6 @@ class TensorPow : public TensorContents{
 
 class TensorReduceSum : public TensorContents{
     Tensor arg1;
-    // dimension of reduction
     
     public:
         TensorReduceSum(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
