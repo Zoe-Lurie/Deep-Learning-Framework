@@ -75,6 +75,24 @@ void cpuElementwiseMultScalar(double * ret, double * data1, double n, size_t dat
     }
 }
 
+void cpuElementwiseDivision(double * ret, double * data1, double * data2, size_t dataLen){
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[i] = data1[i] / data2[i];
+    }
+}
+
+void cpuElementwiseDivisionScalar(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[i] = data1[i] / n;
+    }
+}
+
+void cpuElementwiseDivisionScalar2(double * ret, double * data1, double n, size_t dataLen){
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[i] = n / data1[i];
+    }
+}
+
 void cpuRelu(double * ret, double * data1, size_t dataLen){
     for(size_t i = 0; i < dataLen; ++i){
         ret[i] = data1[i] > 0 ? data1[i] : 0;

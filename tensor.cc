@@ -22,7 +22,7 @@ vDataPtr Tensor::eval(){
 }
 
 void Tensor::backward(Tensor grad){
-    if(contents->dims != grad.contents->dims) throw std::runtime_error("Dimenions of grad and tensor must match in backward in tensor with operation");
+    if(contents->dims != grad.contents->dims) throw std::runtime_error("Dimenions of grad and tensor must match in backward");
     if(!contents->saveGradient) return;
 
     if(!contents->gradient) contents->gradient = std::make_shared<Tensor>(grad);
@@ -73,46 +73,67 @@ Tensor Tensor::fill(vDims dims, double n, bool saveGradient){
 }
 
 Tensor Tensor::neg(bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     Tensor ret =  MAKET(Neg, (contents->dims, saveGradient, *this));
     return ret;
 }
 
 Tensor Tensor::add(Tensor x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::add");
     return MAKET(Add, (contents->dims, saveGradient, *this, x));
 }
 
 Tensor Tensor::add(double x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(AddScalar, (contents->dims, saveGradient, *this, x));
 }
 
 Tensor Tensor::subtract(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::add");
+    saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
     return MAKET(Subtract, (contents->dims, saveGradient, *this, x));
 }
 
 Tensor Tensor::subtract(double x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(SubtractScalar, (contents->dims, saveGradient, *this, x));
 }
 
 Tensor Tensor::elementwiseMult(Tensor x, bool saveGradient){
     if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseMult");
+    saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
     return MAKET(ElementwiseMult, (contents->dims, saveGradient, *this, x));
 }
 
 Tensor Tensor::elementwiseMult(double x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(ElementwiseMultScalar, (contents->dims, saveGradient, *this, x));
 }
 
+Tensor Tensor::elementwiseDivision(Tensor x, bool saveGradient){
+    if(!isBroadcastable(contents->dims, x.contents->dims)) throw std::runtime_error("Mismatched dimensions in Tensor::elementwiseDivision");
+    saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
+    return MAKET(ElementwiseDivision, (contents->dims, saveGradient, *this, x));
+}
+
+Tensor Tensor::elementwiseDivision(double x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
+    return MAKET(ElementwiseDivisionScalar, (contents->dims, saveGradient, *this, x));
+}
+
 Tensor Tensor::relu(bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(Relu, (contents->dims, saveGradient, *this));
 }
 
 Tensor Tensor::binarize(bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(Binarize, (contents->dims, saveGradient, *this));
 }
 
 Tensor Tensor::pow(double x, bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(Pow, (contents->dims, saveGradient, *this, x));
 }
 
@@ -129,6 +150,7 @@ Tensor Tensor::matmul(Tensor x, bool saveGradient){
       throw std::runtime_error("Mismatched matmul matrix dimensions");
     }
 
+    saveGradient = saveGradient || contents->saveGradient || x.contents->saveGradient;
     vDims retdims;
     if(dims.size() == 2) retdims = {dims[0], xdims[1]};
     else retdims = {dims[0], dims[1], xdims[1]};
@@ -137,6 +159,7 @@ Tensor Tensor::matmul(Tensor x, bool saveGradient){
 }
 
 Tensor Tensor::reduceSum(bool saveGradient){
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(ReduceSum, ({1}, saveGradient, *this));
 }
 
@@ -146,6 +169,7 @@ Tensor Tensor::transpose(bool saveGradient){
     else if(contents->dims.size() == 3) retDims = {contents->dims[0], contents->dims[2], contents->dims[1]};
     else throw std::runtime_error("The tensor must be 2d or batched 2d tensors in transpose");
 
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(Transpose, (retDims, saveGradient, *this));
 }
 
@@ -153,6 +177,7 @@ Tensor Tensor::reshape(vDims dims, bool saveGradient){
     size_t newDataLen = TensorContents::calculateDataLen(dims);
     if(newDataLen != contents->dataLen) throw std::runtime_error("Dimensions do not match in reshape");
 
+    saveGradient = saveGradient || contents->saveGradient;
     return MAKET(Reshape, (dims, saveGradient, *this));
 }
 

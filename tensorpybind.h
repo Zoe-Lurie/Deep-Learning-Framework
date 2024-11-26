@@ -4,6 +4,8 @@
 #include <pybind11/operators.h>
 
 #include "tensor.h"
+#include "tensor.cc"
+#include "tensorcpufunctions.h"
 
 namespace py = pybind11;
 
@@ -42,6 +44,11 @@ PYBIND11_MODULE(tensor, m){
         .def(py::self * double())
         .def(double() * py::self)
 
+        .def("elementwiseDivision", py::overload_cast<Tensor, bool>(&Tensor::elementwiseDivision))
+        .def("elementwiseDivision", py::overload_cast<double, bool>(&Tensor::elementwiseDivision))
+        .def(py::self / py::self)
+        .def(py::self / double())
+        .def(double() / py::self)
 
         .def("neg", &Tensor::neg)
         .def("__neg__", [](Tensor a) {return a.neg();}, py::is_operator())
