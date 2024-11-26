@@ -60,7 +60,7 @@ void Tensor::backward(Tensor grad){
 Tensor Tensor::getGradient(){
     if(!contents->saveGradient) throw std::runtime_error("saveGradient in Tensor must be true");
     if(!contents->foundGradient) throw std::runtime_error("Backward must have been called on an output to this Tensor");
-    return *contents->gradient;
+    return *(contents->gradient);
 }
 
 
@@ -71,19 +71,23 @@ vDims Tensor::getDims(){
 std::vector<double> Tensor::getData(){
     eval();
     std::vector<double> ret;
+    ret.resize(contents->dataLen);
 
     #ifdef CUDA
         if(contents->onGPU) TensorGPUUtility::toCPU(ret.data(), contents->data.get(), contents->dataLen);
+        else ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
+    #else
+        ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
     #endif
 
-    ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
+
     return ret;
 }
 
 void Tensor::print(){
     auto data = getData();
-    for(auto d : data)
-        printf("%f\n", d);
+    for(size_t i = 0; i < contents->dataLen; ++i)
+        printf("%f\n", data[i]);
 }
 
 
