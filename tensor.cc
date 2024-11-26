@@ -30,7 +30,7 @@ Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient, deviceOp
         #endif
     }
     else{
-        retDataPtr = std::make_shared<double>(new double[data.size()], std::default_delete<double[]>());
+        retDataPtr = std::shared_ptr<double>(new double[data.size()], std::default_delete<double[]>());
         std::copy(data.begin(), data.end(), retDataPtr.get());
     }
     contents = std::make_shared<TensorContents>(
@@ -69,6 +69,7 @@ vDims Tensor::getDims(){
 }
 
 std::vector<double> Tensor::getData(){
+    eval();
     std::vector<double> ret;
 
     #ifdef CUDA

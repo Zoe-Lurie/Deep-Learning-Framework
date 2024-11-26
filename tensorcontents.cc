@@ -25,10 +25,10 @@
     #define CALLFUNC(NAME, ARGS) if(onGPU) TensorGPUUtility::gpuS##NAME ARGS; else cpu##NAME ARGS;
     #define MAKEDATA \
             (onGPU) ? TensorGPUUtility::allocate(dataLen) : \
-                std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
+                std::shared_ptr<double>(new double[dataLen], std::default_delete<double[]>());
 #else // no CUDA
     #define CALLFUNC(NAME, ARGS) cpu##NAME ARGS;
-    #define MAKEDATA std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
+    #define MAKEDATA std::shared_ptr<double>(new double[dataLen], std::default_delete<double[]>());
 #endif
 
 #define ISSCALAR(TENSOR) ((TENSOR).getDims().size() == 1 && (TENSOR).getDims()[0] == 1)
