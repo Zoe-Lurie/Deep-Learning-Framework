@@ -2,18 +2,21 @@
 #include <stdexcept>
 
 #include "tensor.h"
+#include "tensorcpufunctions.h"
 
-//#define CUDA
+/*
+ * Derivates of functions taken from: https://github.com/HIPS/autograd/blob/master/autograd/numpy/numpy_vjps.py
+ */
+
+#define CUDA
 #ifdef CUDA
-    #include "tensorgpufunctions.cuh"
     #include "tensorgpuutility.cuh"
     
-    #define CALLFUNC(NAME, ARGS) if(onGPU) gpu##NAME ARGS; else cpu##NAME ARGS;
+    #define CALLFUNC(NAME, ARGS) if(onGPU) TensorGPUUtility::gpuS##NAME ARGS; else cpu##NAME ARGS;
     #define MAKEDATA \
             (onGPU) ? TensorGPUUtility::allocate(dataLen) : \
                 std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
 #else // no CUDA
-    #include "tensorcpufunctions.h"
     #define CALLFUNC(NAME, ARGS) cpu##NAME ARGS;
     #define MAKEDATA std::make_shared<double>(new double[dataLen], std::default_delete<double[]>());
 #endif
