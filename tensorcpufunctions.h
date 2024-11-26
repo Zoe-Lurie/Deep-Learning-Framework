@@ -24,6 +24,7 @@ void cpuMatmul2d(double * ret, double * data1, double * data2, size_t retDims0, 
 void cpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, size_t retDims1, size_t retDims2, size_t data1Dims1, size_t data1Dims2, size_t data2Dims1);
 void cpuTranspose2d(double * ret, double * data1, size_t retDims0, size_t retDims1);
 void cpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDims1, size_t retDims2);
+void cpuReduceSum(double * ret, double * data1, size_t dataLen);
 
 #endif
 

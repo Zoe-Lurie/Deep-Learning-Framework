@@ -3,17 +3,34 @@
 
 #include "tensor.h"
 
+#define OP(x, y) x.pow(2)
+
 int main(){
 
-    auto x = Tensor({2,3}, {1,2,3,3,2,1}, true);
-    auto y = Tensor({2,3}, {3,2,1,1,2,3}, true);
-    auto z = Tensor({3,2}, {0,1,2,3,4,5}, true);
+    std::cout << "CPU output:\n";
 
-    auto L = 2 / x;
-    L = L.reduceSum();
+    auto cx = Tensor({2,3}, {1,2,3,3,2,1}, true, CPU);
+    auto cy = Tensor({2,3}, {3,2,1,1,2,3}, true, CPU);
+
+    auto cL = OP(cx, cy);
+    cL.print();
+
+    cL.backward(Tensor::ones({2,3}, CPU));
+
+    std::cout << "\n";
+    cx.getGradient().print();
+    std::cout << "\n";
+    //cy.getGradient().print();
+
+    std::cout << "GPU output:\n";
+
+    auto x = Tensor({2,3}, {1,2,3,3,2,1}, true, GPU);
+    auto y = Tensor({2,3}, {3,2,1,1,2,3}, true, GPU);
+
+    auto L = OP(x, y);
     L.print();
 
-    L.backward();
+    L.backward(Tensor::ones({2,3}, GPU));
 
     std::cout << "\n";
     x.getGradient().print();

@@ -147,3 +147,10 @@ void cpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDim
     }
 }
 
+void cpuReduceSum(double * ret, double * data1, size_t dataLen){
+    ret[0] = 0;
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[0] += data1[i];
+    }
+}
+
