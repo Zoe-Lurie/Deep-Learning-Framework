@@ -18,7 +18,6 @@ struct TensorContents{
     vDataPtr data;
     size_t dataLen;
     vDims dims;
-    //vDims strides;
 
     bool evaluated;
     bool saveGradient;
@@ -43,13 +42,6 @@ struct TensorContents{
         evaluated = true;
         dataLen = calculateDataLen(dims);
 
-        /*
-        strides = std::vector<size_t>(dims.size());
-        strides[dims.size() - 1] = 1;
-        for(size_t i = dims.size() - 2; i >= 0; --i){
-            strides[i] = strides[i+1] * dims[i+1];
-        }
-        */
     }
 
     TensorContents(vDims dims, bool saveGradient) : dims(dims), saveGradient(saveGradient) {
@@ -465,6 +457,57 @@ class TensorReshape : public TensorContents{
 
         void backward(Tensor gradient){
             arg1.backward(gradient.reshape(arg1.getDims()));
+        }
+};
+
+class TensorElementwiseDivision : public TensorContents{
+    Tensor arg1, arg2;
+    
+    public:
+        TensorElementwiseDivision(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+
+        operation getOp() {return ELEMENTWISEDIVISION;}
+
+        void eval(){
+            double * data1 = evalTensor(arg1)->data();
+            double * data2 = evalTensor(arg2)->data();
+            data = MAKEDATA;
+            double * ret = data->data();
+
+            if(ISSCALAR(arg1)) cpuElementwiseDivisionScalar2(ret, data2, data1[0], dataLen);
+            else if(ISSCALAR(arg2)) cpuElementwiseDivisionScalar(ret, data1, data2[0], dataLen);
+            else cpuElementwiseDivision(ret, data1, data2, dataLen);
+        }
+
+        void backward(Tensor gradient){
+            if(ISSCALAR(arg1)) arg1.backward((gradient / arg2).reduceSum());
+            else arg1.backward(gradient / arg2);
+            if(ISSCALAR(arg2)) arg2.backward((gradient.neg() * arg1 / arg2.pow(2)).reduceSum());
+            else arg2.backward(gradient.neg() * arg1 / arg2.pow(2));
+        }
+};
+
+class TensorElementwiseDivisionScalar : public TensorContents{
+    Tensor arg1;
+    double n;
+    
+    public:
+        TensorElementwiseDivisionScalar(vDims dims, bool saveGradient, Tensor arg1, double n)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+
+        operation getOp() {return ELEMENTWISEDIVISIONSCALAR;}
+
+        void eval(){
+            double * data1 = evalTensor(arg1)->data();
+            data = MAKEDATA;
+            double * ret = data->data();
+
+            cpuElementwiseDivisionScalar(ret, data1, n, dataLen);
+        }
+
+        void backward(Tensor gradient){
+            arg1.backward(gradient / n);
         }
 };
 
