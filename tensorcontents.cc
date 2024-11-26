@@ -61,8 +61,16 @@ struct TensorContents{
 
     TensorContents(vDims dims, bool saveGradient, bool onGPU) : dims(dims), saveGradient(saveGradient), evaluated(false), dataLen(calculateDataLen(dims)), onGPU(onGPU) {}
 
-    static vDataPtr evalTensor(Tensor t){
-        return t.eval();
+     vDataPtr evalTensor(Tensor t){
+        vDataPtr p =  t.eval();
+        if(onGPU != t.contents->onGPU){
+            #ifdef CUDA
+                p = TensorGPUUtility::convert(p, onGPU, dataLen);
+            #else
+                throw std::runtime_error("Cannot select GPU since not compiled with CUDA");
+            #endif
+        }
+        return p;
     }
 };
 

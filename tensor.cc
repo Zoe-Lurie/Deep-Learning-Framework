@@ -13,9 +13,20 @@
 
 Tensor::Tensor(vDims dims, std::vector<double> data, bool saveGradient, deviceOptions device) {
     bool onGPU = device == GPU;
+    std::shared_ptr<double> retDataPtr;
+    if(onGPU){
+        #ifdef CUDA
+            retDataPtr = TensorGPUUtility::toGPU(data.data(), data.size());
+        #else
+            throw std::runtime_error("Cannot select GPU since not compiled with CUDA");
+        #endif
+    }
+    else{
+        retDataPtr = std::make_shared<double>(new double[data.size()], std::default_delete<double[]>());
+        std::copy(data.begin(), data.end(), retDataPtr.get());
+    }
     contents = std::make_shared<TensorContents>(
-            TensorContents(dims, std::make_shared<double>(new double[data.size()], std::default_delete<double[]>()), saveGradient, onGPU));
-    std::copy(data.begin(), data.end(), contents->data.get());
+            TensorContents(dims, retDataPtr, saveGradient, onGPU));
 }
 
 Tensor::Tensor(TensorContentsPtr ptr) : contents(ptr) {}
@@ -53,7 +64,7 @@ std::vector<double> Tensor::getData(){
     std::vector<double> ret;
 
     #ifdef CUDA
-        if(contents->onGPU) toCPU();
+        if(contents->onGPU) toCPU(ret.data(), contents->data.get(), contents->dataLen);
     #endif
 
     ret.insert(ret.begin(), contents->data.get(), contents->data.get() + contents->dataLen);
@@ -65,22 +76,6 @@ void Tensor::print(){
     for(auto d : data)
         printf("%f\n", d);
 }
-
-#ifdef CUDA
-void Tensor::toGPU(){
-    double * tmp;
-    TensorGPUUtility::toGPU(contents->data.get(), tmp, contents->dataLen);
-    contents->data = std::shared_ptr<double>(tmp, cudaFree);
-    contents->onGPU = true;
-}
-
-void Tensor::toCPU(){
-    double * tmp = new double[contents->dataLen];
-    TensorGPUUtility::toCPU(tmp, contents->data.get(), contents->dataLen);
-    contents->data = std::shared_ptr<double>(tmp, std::default_delete<double[]>());
-    contents->onGPU = false;
-}
-#endif
 
 
 bool isBroadcastable(vDims d1, vDims d2){
