@@ -56,10 +56,10 @@ struct TensorContents{
         return dataLen;
     }
 
-    TensorContents(vDims dims, vDataPtr data, bool saveGradient)
-        : dims(dims), data(data), saveGradient(saveGradient), evaluated(true), dataLen(calculateDataLen(dims)) {}
+    TensorContents(vDims dims, vDataPtr data, bool saveGradient, bool onGPU)
+        : dims(dims), data(data), saveGradient(saveGradient), evaluated(true), dataLen(calculateDataLen(dims)), onGPU(onGPU) {}
 
-    TensorContents(vDims dims, bool saveGradient) : dims(dims), saveGradient(saveGradient), evaluated(false), dataLen(calculateDataLen(dims)) {}
+    TensorContents(vDims dims, bool saveGradient, bool onGPU) : dims(dims), saveGradient(saveGradient), evaluated(false), dataLen(calculateDataLen(dims)), onGPU(onGPU) {}
 
     static vDataPtr evalTensor(Tensor t){
         return t.eval();
@@ -70,8 +70,8 @@ class TensorNeg : public TensorContents{
     Tensor arg1;
 
     public:
-        TensorNeg(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorNeg(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return NEG;}
 
@@ -92,8 +92,8 @@ class TensorAdd : public TensorContents{
     Tensor arg1, arg2;
     
     public:
-        TensorAdd(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
-            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+        TensorAdd(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2, bool onGPU)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ADD;}
 
@@ -121,8 +121,8 @@ class TensorAddScalar : public TensorContents{
     double n;
     
     public:
-        TensorAddScalar(vDims dims, bool saveGradient, Tensor arg1, double n)
-            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+        TensorAddScalar(vDims dims, bool saveGradient, Tensor arg1, double n, bool onGPU)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ADDSCALAR;}
 
@@ -143,8 +143,8 @@ class TensorSubtract : public TensorContents{
     Tensor arg1, arg2;
     
     public:
-        TensorSubtract(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
-            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+        TensorSubtract(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2, bool onGPU)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return SUBTRACT;}
 
@@ -172,8 +172,8 @@ class TensorSubtractScalar : public TensorContents{
     double n;
     
     public:
-        TensorSubtractScalar(vDims dims, bool saveGradient, Tensor arg1, double n)
-            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+        TensorSubtractScalar(vDims dims, bool saveGradient, Tensor arg1, double n, bool onGPU)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return SUBTRACTSCALAR;}
 
@@ -195,8 +195,8 @@ class TensorPow : public TensorContents{
     double n;
     
     public:
-        TensorPow(vDims dims, bool saveGradient, Tensor arg1, double n)
-            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+        TensorPow(vDims dims, bool saveGradient, Tensor arg1, double n, bool onGPU)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return POW;}
 
@@ -218,8 +218,8 @@ class TensorReduceSum : public TensorContents{
     // dimension of reduction
     
     public:
-        TensorReduceSum(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorReduceSum(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return REDUCESUM;}
 
@@ -239,7 +239,7 @@ class TensorReduceSum : public TensorContents{
 
 class TensorZeroes : public TensorContents{
     public:
-        TensorZeroes(vDims dims, bool saveGradient) : TensorContents(dims, saveGradient) {}
+        TensorZeroes(vDims dims, bool saveGradient, bool onGPU) : TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ZEROES;}
 
@@ -257,7 +257,7 @@ class TensorZeroes : public TensorContents{
 
 class TensorOnes : public TensorContents{
     public:
-        TensorOnes(vDims dims, bool saveGradient) : TensorContents(dims, saveGradient) {}
+        TensorOnes(vDims dims, bool saveGradient, bool onGPU) : TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ONES;}
 
@@ -277,7 +277,7 @@ class TensorFill : public TensorContents{
     double n;
 
     public:
-        TensorFill(vDims dims, bool saveGradient, double n) : TensorContents(dims, saveGradient), n(n) {}
+        TensorFill(vDims dims, bool saveGradient, double n, bool onGPU) : TensorContents(dims, saveGradient, onGPU), n(n) {}
 
         operation getOp() {return FILL;}
 
@@ -297,8 +297,8 @@ class TensorElementwiseMult : public TensorContents{
     Tensor arg1, arg2;
     
     public:
-        TensorElementwiseMult(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
-            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+        TensorElementwiseMult(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2, bool onGPU)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ELEMENTWISEMULT;}
 
@@ -326,8 +326,8 @@ class TensorElementwiseMultScalar : public TensorContents{
     double n;
     
     public:
-        TensorElementwiseMultScalar(vDims dims, bool saveGradient, Tensor arg1, double n)
-            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+        TensorElementwiseMultScalar(vDims dims, bool saveGradient, Tensor arg1, double n, bool onGPU)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ELEMENTWISEMULTSCALAR;}
 
@@ -348,8 +348,8 @@ class TensorRelu : public TensorContents{
     Tensor arg1;
     
     public:
-        TensorRelu(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorRelu(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return RELU;}
 
@@ -370,8 +370,8 @@ class TensorBinarize : public TensorContents{
     Tensor arg1;
     
     public:
-        TensorBinarize(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorBinarize(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return BINARIZE;}
 
@@ -393,8 +393,8 @@ class TensorMatmul : public TensorContents{
     Tensor arg1, arg2;
     
     public:
-        TensorMatmul(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
-            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+        TensorMatmul(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2, bool onGPU)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return MATMUL;}
 
@@ -430,8 +430,8 @@ class TensorTranspose : public TensorContents{
     Tensor arg1;
     
     public:
-        TensorTranspose(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorTranspose(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return TRANSPOSE;}
 
@@ -455,8 +455,8 @@ class TensorReshape : public TensorContents{
     Tensor arg1;
     
     public:
-        TensorReshape(vDims dims, bool saveGradient, Tensor arg1)
-            : arg1(arg1), TensorContents(dims, saveGradient) {}
+        TensorReshape(vDims dims, bool saveGradient, Tensor arg1, bool onGPU)
+            : arg1(arg1), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return RESHAPE;}
 
@@ -473,8 +473,8 @@ class TensorElementwiseDivision : public TensorContents{
     Tensor arg1, arg2;
     
     public:
-        TensorElementwiseDivision(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2)
-            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient) {}
+        TensorElementwiseDivision(vDims dims, bool saveGradient, Tensor arg1, Tensor arg2, bool onGPU)
+            : arg1(arg1), arg2(arg2), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ELEMENTWISEDIVISION;}
 
@@ -502,8 +502,8 @@ class TensorElementwiseDivisionScalar : public TensorContents{
     double n;
     
     public:
-        TensorElementwiseDivisionScalar(vDims dims, bool saveGradient, Tensor arg1, double n)
-            : arg1(arg1), n(n), TensorContents(dims, saveGradient) {}
+        TensorElementwiseDivisionScalar(vDims dims, bool saveGradient, Tensor arg1, double n, bool onGPU)
+            : arg1(arg1), n(n), TensorContents(dims, saveGradient, onGPU) {}
 
         operation getOp() {return ELEMENTWISEDIVISIONSCALAR;}
 
