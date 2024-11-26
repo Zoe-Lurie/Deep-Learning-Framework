@@ -1,14 +1,15 @@
+
+/*
+ * Derivates of functions taken from: https://github.com/HIPS/autograd/blob/master/autograd/numpy/numpy_vjps.py
+ */
+
 #include <memory>
 #include <stdexcept>
 
 #include "tensor.h"
 #include "tensorcpufunctions.h"
 
-/*
- * Derivates of functions taken from: https://github.com/HIPS/autograd/blob/master/autograd/numpy/numpy_vjps.py
- */
-
-#define CUDA
+//#define CUDA
 #ifdef CUDA
     #include "tensorgpuutility.cuh"
     
