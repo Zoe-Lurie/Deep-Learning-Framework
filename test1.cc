@@ -9,8 +9,7 @@ int main(){
     auto y = Tensor({2,3}, {3,2,1,1,2,3}, true);
     auto z = Tensor({3,2}, {0,1,2,3,4,5}, true);
 
-    auto L = 2 / x;
-    L = L.reduceSum();
+    auto L = (x - y).pow(3).reduceSum();
     L.print();
 
     L.backward();
@@ -18,7 +17,7 @@ int main(){
     std::cout << "\n";
     x.getGradient().print();
     std::cout << "\n";
-    //y.getGradient().print();
+    y.getGradient().print();
 
     return 0;
 }
