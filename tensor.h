@@ -69,11 +69,7 @@ class Tensor{
         Tensor matmul(Tensor, bool saveGradient = false);
 
         Tensor reduceSum(bool saveGradient = false);
-        //Tensor reduceSum(size_t dim = 0);
-        //Tensor reduceProd(size_t dim = 0);
-        //Tensor reduceMean(size_t dim = 0);
         Tensor softmax(bool saveGradient = false) {return this->elementwiseDivision(this->reduceSum(saveGradient), saveGradient);}
-        //Tensor argmax();
 };
 #endif
 
