@@ -37,7 +37,7 @@
 
 enum operation {ZEROES, ADD, ADDSCALAR, NEG, SOFTMAX, SUBTRACT, SUBTRACTSCALAR,
     ELEMENTWISEMULT, ELEMENTWISEMULTSCALAR, ELEMENTWISEDIVISION,
-    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, 
+    ELEMENTWISEDIVISIONSCALAR, RELU, BINARIZE, POW, FILLRANDOM, 
     ONES, MATMUL, FILL, DATA, REDUCESUM, TRANSPOSE, RESHAPE};
 
 
@@ -538,3 +538,22 @@ class TensorElementwiseDivisionScalar : public TensorContents{
         }
 };
 
+class TensorFillRandom : public TensorContents{
+    double mean, stddev;
+
+    public:
+        TensorFillRandom(vDims dims, bool saveGradient, double mean, double stddev, bool onGPU) : TensorContents(dims, saveGradient, onGPU), mean(mean), stddev(stddev) {}
+
+        operation getOp() {return FILLRANDOM;}
+
+        void eval(){
+            data = MAKEDATA;
+            double * ret = data.get();
+
+            CALLFUNC(FillRandom, (ret, mean, stddev, dataLen));
+        }
+
+        void backward(Tensor gradient){
+            (void) gradient;
+        }
+};

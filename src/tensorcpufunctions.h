@@ -25,6 +25,7 @@ void cpuMatmul3d(double * ret, double * data1, double * data2, size_t retDims0, 
 void cpuTranspose2d(double * ret, double * data1, size_t retDims0, size_t retDims1);
 void cpuTranspose3d(double * ret, double * data1, size_t retDims0, size_t retDims1, size_t retDims2);
 void cpuReduceSum(double * ret, double * data1, size_t dataLen);
+void cpuFillRandom(double * ret, double mean, double stddev, size_t dataLen);
 
 #endif
 

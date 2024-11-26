@@ -1,7 +1,10 @@
 #include <cstdlib>
 #include <cmath>
+#include <random>
 
 #include "tensorcpufunctions.h"
+
+std::mt19937 generator(7);
 
 void cpuNeg(double * ret, double * data1, size_t dataLen){
     #pragma omp parallel for
@@ -173,6 +176,15 @@ void cpuReduceSum(double * ret, double * data1, size_t dataLen){
     #pragma omp parallel for reduction(+:ret[0])
     for(size_t i = 0; i < dataLen; ++i){
         ret[0] += data1[i];
+    }
+}
+
+void cpuFillRandom(double * ret, double mean, double stddev, size_t dataLen){
+    std::normal_distribution<double> dist(mean, stddev);
+
+    #pragma omp parallel for
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[i] = dist(generator);
     }
 }
 

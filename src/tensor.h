@@ -110,6 +110,18 @@ class Tensor{
         static Tensor fill(vDims, double n, bool saveGradient = false, deviceOptions device = DEFAULTDEVICE);
 
         /**
+         * @brief Creates a tensor filled with normally distrubuted random values.
+         * 
+         * @param dimensions Shape of the tensor.
+         * @param mean Mean of normal distribution.
+         * @param stddev Standard deviation of normal distribution.
+         * @param saveGradient Whether to compute gradients (default: false).
+         * @param device Device to allocate the tensor (default: DEFAULTDEVICE).
+         * @return A tensor filled with the specified value.
+         */
+        static Tensor fillRandom(vDims, double mean, double stddev, bool saveGradient = false, deviceOptions device = DEFAULTDEVICE);
+
+        /**
          * @brief Performs backpropagation to compute gradients.
          * 
          * @param grad Gradient to propagate (default: a tensor of scalar one).

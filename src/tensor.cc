@@ -129,6 +129,12 @@ Tensor Tensor::fill(vDims dims, double n, bool saveGradient, deviceOptions devic
     return MAKET(Fill, (dims, saveGradient, n, onGPU));
 }
 
+Tensor Tensor::fillRandom(vDims dims, double mean, double stddev, bool saveGradient, deviceOptions device){
+    bool onGPU = device == GPU;
+    if(onGPU) throw std::runtime_error("fillRandom is not available on GPU");
+    return MAKET(FillRandom, (dims, saveGradient, mean, stddev, onGPU));
+}
+
 Tensor Tensor::neg(bool saveGradient, deviceOptions device){
     saveGradient = saveGradient || contents->saveGradient;
     bool onGPU = device == GPU || (device == DEFAULTDEVICE && contents->onGPU);
