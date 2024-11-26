@@ -144,3 +144,10 @@ __global__ void gpuTranspose3d(double * ret, double * data1, size_t retDims0, si
     }
 }
 
+void gpuReduceSum(double * ret, double * data1, size_t dataLen){
+    // kernel must be started with <<<1,1>>>
+    ret[0] = 0;
+    for(size_t i = 0; i < dataLen; ++i){
+        ret[0] += data1[i];
+    }
+}
