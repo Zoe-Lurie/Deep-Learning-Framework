@@ -1,3 +1,11 @@
+/**
+ * @file tensorgpufunction.cu
+ * @brief Implements GPU functions for each operation.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #include "tensorgpufunctions.h"
 
 #define NUMBLOCKS 256

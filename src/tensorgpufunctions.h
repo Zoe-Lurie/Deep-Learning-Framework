@@ -1,3 +1,11 @@
+/**
+ * @file tensorgpufunction.h
+ * @brief Defines GPU functions for each operation.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #ifndef TENSORGPUFUNCTIONH
 #define TENSORGPUFUNCTIONH
 

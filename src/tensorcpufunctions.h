@@ -1,3 +1,11 @@
+/**
+ * @file tensorcpufunctions.h
+ * @brief CPU functions for each operation.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #ifndef TENSORCPUFUNCTIONH
 #define TENSORCPUFUNCTIONH
 

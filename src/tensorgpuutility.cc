@@ -1,3 +1,11 @@
+/**
+ * @file tensorgpuutility.cc
+ * @brief Implements the GPU utility functions.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #include <memory>
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"

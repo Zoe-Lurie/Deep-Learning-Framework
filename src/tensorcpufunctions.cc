@@ -1,3 +1,11 @@
+/**
+ * @file tensorcpufunctions.cc
+ * @brief Implements the CPU functions.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #include <cstdlib>
 #include <cmath>
 #include <random>

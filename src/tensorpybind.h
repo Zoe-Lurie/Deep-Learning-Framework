@@ -1,3 +1,11 @@
+/**
+ * @file tensorpybind.h
+ * @brief Binds the Tensor C++ class and functions to Python.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>

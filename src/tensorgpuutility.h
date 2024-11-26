@@ -1,3 +1,11 @@
+/**
+ * @file tensorgpuutility.h
+ * @brief Defines GPU utility functions.
+ * 
+ * @author Zoe Lurie
+ * @date November 2024
+ */
+
 #ifndef TENSORGPUUTILITYH
 #define TENSORGPUUTILITYH
 
