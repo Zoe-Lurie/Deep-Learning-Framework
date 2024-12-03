@@ -34,10 +34,10 @@ std::vector<std::pair<int, Tensor>>  readInput(std::string filename, size_t size
     return data;
 }
 
-std::pair<int, Tensor> predict(std::vector<Tensor> weights, Tensor t, int num_classes){
+std::pair<int, std::vector<Tensor>> predict(std::vector<Tensor> weights, Tensor t, int num_classes){
     std::vector<Tensor> class_outputs;
     for(Tensor& w : weights){
-        class_outputs.push_back(t.matmul(w).reduceSum());
+        class_outputs.push_back(t.elementwiseMult(w).reduceSum());
     }
 
     int index = 0;
@@ -51,10 +51,10 @@ std::pair<int, Tensor> predict(std::vector<Tensor> weights, Tensor t, int num_cl
         }
     }
 
-    return std::make_pair(index, class_outputs[index]);
+    return std::make_pair(index, class_outputs);
 }
 
-void train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data, std::vector<std::pair<int, Tensor>> test_data, double req_acc, int num_classes, double learning_rate, int max_epochs){
+std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data, std::vector<std::pair<int, Tensor>> test_data, double req_acc, int num_classes, double learning_rate, int max_epochs){
     double acc = 0;
     int epoch = 0;
 
@@ -63,16 +63,18 @@ void train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data
         for(auto& d : data){
             auto p = predict(weights, d.second, num_classes);
             int index = p.first;
-            Tensor output = p.second;
+            std::vector<Tensor> outputs = p.second;
             
             if(index != d.first){
-                output.backward();
                 for(int i = 0; i < num_classes; ++i){
+                    outputs[i].backward();
                     weights[i] = weights[i] - weights[i].getGradient() * learning_rate;
                 }
             }
 
-            std::cout << "Training sample " << m << " processed";
+            if(m % 1000 == 0)
+                std::cout << "Training sample " << m << " processed\n";
+            m ++;
         }
         
         size_t num_correct = 0;
@@ -84,25 +86,30 @@ void train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data
         }
         acc = (double) num_correct / test_data.size();
 
-        std::cout << "Epoch " << epoch << " complete with accuracy " << acc;
+        std::cout << "Epoch " << epoch << " complete with accuracy " << acc << "\n";
         epoch ++;
     }
+
+    return weights;
 }
 
 int main(){
     //Tensor::setOmpNumThreads(8);
+    //
+    size_t num_features = 784;
+    int num_classes = 10;
 
     std::string data_file = "data/mnist.t";
     std::string test_data_file = "data/mnist.t";
 
-    auto data = readInput(data_file, 784);
-    auto test_data = readInput(test_data_file, 784);
+    auto data = readInput(data_file, num_features);
+    auto test_data = readInput(test_data_file, num_features);
 
-    size_t num_features = 200;
-    int num_classes = 10;
     std::vector<Tensor> weights;
     for(int i = 0; i < num_classes; ++i)
         weights.push_back(Tensor::fillRandom({num_features}, 0, 0.1, true));
+
+    auto final_weights = train(weights, data, test_data, 0.6, 10, 0.1, 2);
 
     return 0;
 }

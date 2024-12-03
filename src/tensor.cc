@@ -109,7 +109,7 @@ bool isBroadcastable(vDims d1, vDims d2){
 
 vDims getBroadcastDims(vDims d1, vDims d2){
     if(d1 == d2) return d1;
-    if(d1.size() == 1) return d2;
+    if(d1.size() == 1 && d1[0] == 1) return d2;
     return d1;
 }
 
