@@ -7,7 +7,7 @@
 
 #include "src/tensor.h"
 
-std::vector<std::pair<int, Tensor>>  readInput(std::string filename, size_t size){
+std::vector<std::pair<int, Tensor>> readInput(std::string filename, size_t size){
     std::ifstream file(filename);
 
     std::vector<std::pair<int, Tensor>> data;
@@ -79,7 +79,7 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
         
         size_t num_correct = 0;
         for(auto& t : test_data){
-            auto p = predict(weights, t.second, num_classes);
+            auto p = predict(weights, t.second, num_classes, num_features);
             int index = p.first;
             if(index == t.first)
                 num_correct ++;
