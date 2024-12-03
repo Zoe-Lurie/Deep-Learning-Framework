@@ -68,7 +68,8 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
             if(index != d.first){
                 for(int i = 0; i < num_classes; ++i){
                     outputs[i].backward();
-                    weights[i] = Tensor({num_features}, weights[i].getData(), true) - weights[i].getGradient() * learning_rate;
+                    weights[i] = Tensor({num_features}, weights[i].getData(), true) -
+                        weights[i].getGradient() * learning_rate * Tensor({1}, outputs[i].getData()) / data.size();
                 }
             }
 
@@ -99,7 +100,7 @@ int main(){
     size_t num_features = 784;
     int num_classes = 10;
 
-    std::string data_file = "data/mnist.t";
+    std::string data_file = "data/mnist";
     std::string test_data_file = "data/mnist.t";
 
     auto data = readInput(data_file, num_features);
