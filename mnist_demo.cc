@@ -34,7 +34,7 @@ std::vector<std::pair<int, Tensor>>  readInput(std::string filename, size_t size
     return data;
 }
 
-std::pair<int, std::vector<Tensor>> predict(std::vector<Tensor> weights, Tensor t, int num_classes){
+std::pair<int, std::vector<Tensor>> predict(std::vector<Tensor> weights, Tensor t, int num_classes, int label){
     std::vector<Tensor> class_outputs;
     for(Tensor& w : weights){
         class_outputs.push_back(t.elementwiseMult(w).reduceSum());
@@ -61,7 +61,7 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
     while(acc < req_acc && epoch < max_epochs){
         size_t m = 0;
         for(auto& d : data){
-            auto p = predict(weights, d.second, num_classes);
+            auto p = predict(weights, d.second, num_classes, d.first);
             int index = p.first;
             std::vector<Tensor> outputs = p.second;
             
