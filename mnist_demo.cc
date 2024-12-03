@@ -54,7 +54,7 @@ std::pair<int, std::vector<Tensor>> predict(std::vector<Tensor> weights, Tensor 
     return std::make_pair(index, class_outputs);
 }
 
-std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data, std::vector<std::pair<int, Tensor>> test_data, double req_acc, int num_classes, double learning_rate, int max_epochs){
+std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int, Tensor>> data, std::vector<std::pair<int, Tensor>> test_data, double req_acc, int num_classes, double learning_rate, int max_epochs, size_t num_features){
     double acc = 0;
     int epoch = 0;
 
@@ -68,7 +68,7 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
             if(index != d.first){
                 for(int i = 0; i < num_classes; ++i){
                     outputs[i].backward();
-                    weights[i] = weights[i] - weights[i].getGradient() * learning_rate;
+                    weights[i] = Tensor({num_features}, weights[i].getData(), true) - weights[i].getGradient() * learning_rate;
                 }
             }
 
@@ -86,7 +86,7 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
         }
         acc = (double) num_correct / test_data.size();
 
-        std::cout << "Epoch " << epoch << " complete with accuracy " << acc << "\n";
+        std::cout << "Epoch " << epoch << " complete with accuracy " << acc * 100 << "%\n";
         epoch ++;
     }
 
@@ -94,8 +94,8 @@ std::vector<Tensor> train(std::vector<Tensor> weights, std::vector<std::pair<int
 }
 
 int main(){
-    //Tensor::setOmpNumThreads(8);
-    //
+    Tensor::setOmpNumThreads(8);
+
     size_t num_features = 784;
     int num_classes = 10;
 
@@ -109,7 +109,7 @@ int main(){
     for(int i = 0; i < num_classes; ++i)
         weights.push_back(Tensor::fillRandom({num_features}, 0, 0.1, true));
 
-    auto final_weights = train(weights, data, test_data, 0.6, 10, 0.1, 2);
+    auto final_weights = train(weights, data, test_data, 0.6, num_classes, 0.2, 100, num_features);
 
     return 0;
 }
