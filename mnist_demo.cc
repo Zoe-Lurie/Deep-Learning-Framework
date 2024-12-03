@@ -1,12 +1,37 @@
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 #include <iostream>
 
 #include "src/tensor.h"
 
-std::vector<std::pair<int, Tensor>>  readInput(std::string filename){
+std::vector<std::pair<int, Tensor>>  readInput(std::string filename, size_t size){
+    std::ifstream file(filename);
 
+    std::vector<std::pair<int, Tensor>> data;
 
+    std::string line;
+    while(getline(file, line)){
+        std::stringstream ls(line);
+
+        std::string slabel;
+        ls >> slabel;
+        int label = std::stoi(slabel);
+
+        std::vector<double> d(size, 0);
+        std::string tmp;
+        while(ls >> tmp){
+            size_t index = std::stoi(tmp.substr(0, tmp.find(":")));
+            int num = std::stoi(tmp.substr(tmp.find(":") + 1));
+            d[index] = num;
+        }
+
+        data.push_back(std::make_pair(label ,Tensor({size}, d, false)));
+    }
+
+    return data;
 }
 
 std::pair<int, Tensor> predict(std::vector<Tensor> weights, Tensor t, int num_classes){
@@ -70,15 +95,14 @@ int main(){
     std::string data_file = "data/mnist.t";
     std::string test_data_file = "data/mnist.t";
 
-    auto data = readInput(data_file);
-    auto test_data = readInput(test_data_file);
+    auto data = readInput(data_file, 784);
+    auto test_data = readInput(test_data_file, 784);
 
     size_t num_features = 200;
     int num_classes = 10;
     std::vector<Tensor> weights;
     for(int i = 0; i < num_classes; ++i)
         weights.push_back(Tensor::fillRandom({num_features}, 0, 0.1, true));
-
 
     return 0;
 }
