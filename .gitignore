@@ -34,4 +34,3 @@
 *.dSYM
 .DS_Store
 build/
-data/
